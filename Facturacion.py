@@ -15,9 +15,9 @@ class ventana_principal(Frame):
 ventana = Tk()
 ventana.wm_title('Facturacion textil')
 ventana.iconbitmap(default=".media\\favicon.ico")
-ventana.geometry('1366x768')
+ventana.config(bg='#404040', width='1366', height='768')
 
-x = Label(ventana, text='hola')
+x = Frame(ventana, width='400', height='400', bg='black')
 x.place(relx=0.5, rely=0.5)
 #fondo = PhotoImage(file='media\\wallpaper.gif')
 
