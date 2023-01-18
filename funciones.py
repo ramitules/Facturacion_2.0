@@ -53,6 +53,7 @@ def menu_modificar_cliente(indice: int, cl: list):
 def crear_directorios(nombre: str):
     os.chdir('..')
     os.chdir('Optitex')
+
     try: 
         os.mkdir(f'{nombre}')
         os.mkdir(f'{nombre}\\Facturas')
@@ -60,10 +61,11 @@ def crear_directorios(nombre: str):
         os.mkdir(f'{nombre}\\Molderias')
         os.mkdir(f'{nombre}\\Tizadas')
     except FileExistsError: pass
+
     os.chdir('..')
     os.chdir('Facturacion')
 
-def crear_cliente():
+def crear_cliente_bak():
     try:
         f = open('clientes.pkl', 'rb')
         while True:
