@@ -1,4 +1,5 @@
 from tkinter import *
+import funciones
 
 medidas_principales = {'relx': 0.5, 'rely': 0.5, 'relwidth':0.4, 'relheight': 0.2, 'anchor': 'center'}
 colores_principales = {'bg': '#454545', 'activebackground': '#353535'}
@@ -13,11 +14,14 @@ def comprobar_darkmode():
         colores_principales['bg'] = '#454545'
         colores_principales['activebackground'] = '#353535'
 
-def switch_darkmode(): #AQUI
+def switch_darkmode():
     global dark_mode
+
     if dark_mode == True:
         dark_mode = False
+
     else: dark_mode = True
+    comprobar_darkmode()
 
 class programa(Tk):
     def __init__(self):
@@ -26,7 +30,7 @@ class programa(Tk):
         comprobar_darkmode()
 
         self.wm_title('Facturacion textil')
-        self.geometry('1366x768')
+        self.geometry('1280x720')
         self.iconbitmap(default='.media\\favicon.ico')
         self['bg'] = colores_principales['bg']
 
@@ -55,14 +59,6 @@ class programa(Tk):
 
         else:
             self.boton_dark.config(text='Modo: claro', image=self.img_lightmode)
-
-    
-
-    def switch_darkmode(self):
-        if dark_mode == True:
-            dark_mode = False
-        else: dark_mode = True
-        self.comprobar_darkmode()
 
 
 class caja_principal(Frame):
@@ -127,24 +123,61 @@ class caja_multiuso(caja_principal):
         nueva_caja = caja_principal(self.master)
         nueva_caja.place(**medidas_principales)
 
+    def nueva_ventana(self, boton):
+        if boton['text'] == 'Cargar':
+            nueva = ventana_cargar_cliente(self)
+        elif boton['text'] == 'Editar':
+            pass
+        elif boton['text'] == 'Editar':
+            pass
+
     def cargar_widgets(self):
         self.img_cargar = PhotoImage(file='.media\\cargar.png')
         self.boton_1.config(image=self.img_cargar,
                             text='Cargar',
                             compound=TOP,
-                            border=0)
+                            border=0,
+                            command=lambda: self.nueva_ventana(self.boton_1))
 
         self.img_editar = PhotoImage(file='.media\\editar.png')
         self.boton_2.config(image=self.img_editar,
                             text='Editar',
                             compound=TOP,
-                            border=0)
+                            border=0,
+                            command=lambda: self.nueva_ventana(self.boton_2))
 
         self.img_listar = PhotoImage(file='.media\\listar.png')
         self.boton_3.config(image=self.img_listar,
                             text='Listar',
                             compound=TOP,
-                            border=0)
+                            border=0,
+                            command=lambda: self.nueva_ventana(self.boton_3))
+
+
+class ventana_cargar_cliente(Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.wm_title('Cargar cliente')
+        self.geometry('400x200')
+
+        self.cargar_widgets()
+
+    def cargar_widgets(self):
+        self.label_nombre = Label(self, text='Nombre completo:')
+        self.label_nombre.place(x=0)
+
+        self.nombre = Entry(self)
+        self.nombre.place(x=110, y=2)
+
+        self.boton_cargar = Button(self,
+                                   text='Cargar',
+                                   command=lambda: self.crear(self.nombre.get()))
+
+    def crear(self, n):
+        if funciones.crear_cliente(n):
+
+
+
 
 principal = programa()
 

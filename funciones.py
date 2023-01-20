@@ -65,7 +65,7 @@ def crear_directorios(nombre: str):
     os.chdir('..')
     os.chdir('Facturacion')
 
-def crear_cliente_bak():
+def crear_cliente(n: str):
     try:
         f = open('clientes.pkl', 'rb')
         while True:
@@ -77,16 +77,16 @@ def crear_cliente_bak():
                 break
     except FileNotFoundError: i = int(1)
 
-    nombre = str(input("Nombre: "))
+    nombre = n
     cliente = cli(i, nombre)
 
-    crear_directorios(nombre)
+    #crear_directorios(nombre)
 
     with open('clientes.pkl', 'ab') as f:
         pickle.dump(cliente, f)
-
-    print('Se ha creado el cliente con exito!')
+        
     return True
+
 
 def modificar_cliente():
     clientes = []
