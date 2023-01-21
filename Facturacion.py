@@ -191,6 +191,7 @@ class ventana_cargar_cliente(Toplevel):
 
         self.cargar_widgets()
 
+    @staticmethod
     def cargar_widgets(self):
         self.label_nombre = Label(self, text='Nombre completo:')
         self.label_nombre.grid(column=0, row=0, sticky='e', pady=8)
@@ -312,9 +313,11 @@ class ventana_modificar_cliente(Toplevel):
         self.desplegable_c.bind("<<ComboboxSelected>>", self.opciones)
         self.desplegable_c.pack()
 
-    def opciones(self):
-        self.opc = ventana_cargar_cliente().cargar_widgets()
-        self.opc.pack()
+    def opciones(self, event):
+        self.caja = Frame(self)
+        self.caja.pack()
+
+        ventana_cargar_cliente.cargar_widgets(self.caja)
 
 principal = programa()
 
