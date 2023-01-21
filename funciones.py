@@ -1,5 +1,6 @@
 import pickle
 import os
+from tkinter import messagebox
 from Articulos import art
 from Clientes import cli
 
@@ -10,17 +11,6 @@ def volver():
             break
         except FileNotFoundError: os.chdir('..')
 
-def cargar(lista: list, clase: str):
-    try:
-        f = open(f'{clase}.pkl', 'rb')
-        while True:
-            try:
-                x = pickle.load(f)
-                lista.append(x)
-            except EOFError:
-                f.close()
-                break
-    except FileNotFoundError: return False
 
 def menu_modificar_cliente(indice: int, cl: list):
     while True:
@@ -50,42 +40,6 @@ def menu_modificar_cliente(indice: int, cl: list):
             pickle.dump(cliente, f)
     return True
 
-def crear_directorios(nombre: str):
-    os.chdir('..')
-    os.chdir('Optitex')
-
-    try: 
-        os.mkdir(f'{nombre}')
-        os.mkdir(f'{nombre}\\Facturas')
-        os.mkdir(f'{nombre}\\Vista previa')
-        os.mkdir(f'{nombre}\\Molderias')
-        os.mkdir(f'{nombre}\\Tizadas')
-    except FileExistsError: pass
-
-    os.chdir('..')
-    os.chdir('Facturacion')
-
-def crear_cliente(n: str):
-    try:
-        f = open('clientes.pkl', 'rb')
-        while True:
-            try:
-                x = pickle.load(f)
-            except EOFError:
-                f.close()
-                i = x.ID + 1
-                break
-    except FileNotFoundError: i = int(1)
-
-    nombre = n
-    cliente = cli(i, nombre)
-
-    #crear_directorios(nombre)
-
-    with open('clientes.pkl', 'ab') as f:
-        pickle.dump(cliente, f)
-        
-    return True
 
 
 def modificar_cliente():
@@ -117,24 +71,6 @@ def listar_clientes():
     for cliente in clientes:
         print(cliente)
     return True
-
-
-def menu_clientes():
-    while True:
-        os.system("cls")
-        print("Elija una opcion")
-        print("1. Crear cliente")
-        print("2. Modificar cliente")
-        print("3. Listar clientes")
-        print("0. Volver al menu principal\n")
-        opc = input('Opcion: ')
-
-        if opc == '0': break
-        elif opc == '1': crear_cliente()
-        elif opc == '2': modificar_cliente()
-        elif opc == '3': listar_clientes()
-        else: input('Opcion incorrecta, presione ENTER y vuelva a intentar')
-        input('Presione ENTER para continuar')
 
 def menu_modificar_articulos(indice: int, art: list):
     while True:
@@ -228,21 +164,3 @@ def listar_articulos():
     for articulo in articulos:
         print(articulo)
     return True
-
-
-def menu_articulos():
-    while True:
-        os.system("cls")
-        print("Elija una opcion")
-        print("1. Crear articulo")
-        print("2. Modificar articulo")
-        print("3. Listar articulos")
-        print("0. Volver al menu principal\n")
-        opc = input('Opcion: ')
-
-        if opc == '0': break
-        elif opc == '1': crear_articulo()
-        elif opc == '2': modificar_articulo()
-        elif opc == '3': listar_articulos()
-        else: input('Opcion incorrecta, presione ENTER y vuelva a intentar')
-        input('Presione ENTER para continuar')

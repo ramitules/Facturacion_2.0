@@ -1,8 +1,37 @@
 from tkinter import *
-import funciones
+from tkinter.ttk import Combobox
+from funciones import *
 
 medidas_principales = {'relx': 0.5, 'rely': 0.5, 'relwidth':0.4, 'relheight': 0.2, 'anchor': 'center'}
 colores_principales = {'bg': '#454545', 'activebackground': '#353535'}
+provincias = ["Buenos Aries",
+              "Ciudad Autonoma de Buenos Aires",
+              "Catamarca",
+              "Chaco",
+              "Chubut",
+              "Cordoba",
+              "Corrientes",
+              "Entre Rios",
+              "Formosa",
+              "Jujuy",
+              "La Pampa",
+              "La Rioja",
+              "Mendoza",
+              "Misiones",
+              "Neuquen",
+              "Rio Negro",
+              "Salta",
+              "San Juan",
+              "San Luis",
+              "Santa Cruz",
+              "Santa Fe",
+              "Santiago del Estero",
+              "Tierra del Fuego",
+              "Tucuman"]
+
+condicion_fiscal = ["Consumidor final",
+                    "Monotributista",
+                    "Responsable inscripto"]
 dark_mode = True
 
 def comprobar_darkmode():
@@ -127,7 +156,7 @@ class caja_multiuso(caja_principal):
         if boton['text'] == 'Cargar':
             nueva = ventana_cargar_cliente(self)
         elif boton['text'] == 'Editar':
-            pass
+            nueva = ventana_modificar_cliente(self)
         elif boton['text'] == 'Editar':
             pass
 
@@ -158,26 +187,134 @@ class ventana_cargar_cliente(Toplevel):
     def __init__(self, master=None):
         super().__init__(master)
         self.wm_title('Cargar cliente')
-        self.geometry('400x200')
+        self.geometry('400x400')
 
         self.cargar_widgets()
 
     def cargar_widgets(self):
         self.label_nombre = Label(self, text='Nombre completo:')
-        self.label_nombre.place(x=0)
+        self.label_nombre.grid(column=0, row=0, sticky='e', pady=8)
 
-        self.nombre = Entry(self)
-        self.nombre.place(x=110, y=2)
+        self.nombre = Entry(self, width=30)
+        self.nombre.grid(column=1, row=0, sticky='w')
+
+        self.label_telefono = Label(self, text='Telefono:')
+        self.label_telefono.grid(column=0, row=1, sticky='e', pady=8)
+
+        self.telefono = Entry(self, width=30)
+        self.telefono.grid(column=1, row=1, sticky='w')
+
+        self.label_direccion = Label(self, text='Direccion:')
+        self.label_direccion.grid(column=0, row=2, sticky='e', pady=8)
+
+        self.direccion = Entry(self, width=30)
+        self.direccion.grid(column=1, row=2, sticky='w')
+
+        self.label_ciudad = Label(self, text='Ciudad:')
+        self.label_ciudad.grid(column=0, row=3, sticky='e', pady=8)
+
+        self.ciudad = Entry(self, width=30)
+        self.ciudad.grid(column=1, row=3, sticky='w')
+
+        self.label_provincia = Label(self, text='Provincia')
+        self.label_provincia.grid(column=0, row=4, sticky='e', pady=8)
+
+        self.desplegable_p = Combobox(self, values=provincias, state="readonly", width=27)
+        self.desplegable_p.current(0)
+        self.desplegable_p.grid(column=1, row=4, sticky='w')
+
+        self.label_cond_fiscal = Label(self, text='Condicion fiscal:')
+        self.label_cond_fiscal.grid(column=0, row=5, sticky='e', pady=8)
+
+        self.desplegable_c = Combobox(self, values=condicion_fiscal, state="readonly", width=27)
+        self.desplegable_c.current(0)
+        self.desplegable_c.grid(column=1, row=5, sticky='w')
 
         self.boton_cargar = Button(self,
                                    text='Cargar',
-                                   command=lambda: self.crear(self.nombre.get()))
+                                   command=self.crear_cliente)
+        self.boton_cargar.place(relx=0.5, rely=0.8, anchor='center')
 
-    def crear(self, n):
-        if funciones.crear_cliente(n):
+    def crear_cliente(self):
+        try:
+            f = open('clientes.pkl', 'rb')
+            while True:
+                try:
+                    x = pickle.load(f)
+                except EOFError:
+                    f.close()
+                    i = x.ID + 1
+                    break
+        except FileNotFoundError: i = int(1)
+
+        cliente = cli(id=i,
+                      nombre=self.nombre.get(),
+                      telefono=self.telefono.get(),
+                      direccion=self.direccion.get(),
+                      ciudad=self.ciudad.get(),
+                      provincia=self.desplegable_p.get(),
+                      cond_fiscal=self.desplegable_c.get())
+
+        #self.crear_directorios(self.nombre.get())
+
+        with open('clientes.pkl', 'ab') as f:
+            pickle.dump(cliente, f)
+        
+        messagebox.showinfo(message='El cliente se ha creado con exito',
+                            title='Cliente')
+
+    def crear_directorios(self):
+        os.chdir('..')
+        os.chdir('Optitex')
+
+        try: 
+            os.mkdir(f'{self.nombre.get()}')
+            os.mkdir(f'{self.nombre.get()}\\Facturas')
+            os.mkdir(f'{self.nombre.get()}\\Vista previa')
+            os.mkdir(f'{self.nombre.get()}\\Molderias')
+            os.mkdir(f'{self.nombre.get()}\\Tizadas')
+        except FileExistsError: pass
+
+        os.chdir('..')
+        os.chdir('Facturacion')
+
+def cargar(clase: str):
+    lista = []
+    try:
+        f = open(f'{clase}.pkl', 'rb')
+        while True:
+            try:
+                x = pickle.load(f)
+                lista.append(x)
+            except EOFError:
+                f.close()
+                break
+    except FileNotFoundError: pass
+    return lista
 
 
+class ventana_modificar_cliente(Toplevel):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.wm_title('Modificar cliente')
+        self.geometry('400x200')
 
+        self.clientes = cargar('clientes')
+        self.nombres = [cliente.nombre for cliente in self.clientes]
+
+        self.cargar_widgets()
+
+    def cargar_widgets(self):
+        self.pregunta = Label(self, text='Que cliente desea modificar?')
+        self.pregunta.pack()
+
+        self.desplegable_c = Combobox(self, values=self.nombres, state="readonly")
+        self.desplegable_c.bind("<<ComboboxSelected>>", self.opciones)
+        self.desplegable_c.pack()
+
+    def opciones(self):
+        self.opc = ventana_cargar_cliente().cargar_widgets()
+        self.opc.pack()
 
 principal = programa()
 
