@@ -189,51 +189,52 @@ class ventana_cargar_cliente(Toplevel):
         self.wm_title('Cargar cliente')
         self.geometry('400x400')
 
-        self.cargar_widgets()
-
-    @staticmethod
-    def cargar_widgets(self):
         self.label_nombre = Label(self, text='Nombre completo:')
-        self.label_nombre.grid(column=0, row=0, sticky='e', pady=8)
+        self.label_telefono = Label(self, text='Telefono:')
+        self.label_direccion = Label(self, text='Direccion:')
+        self.label_ciudad = Label(self, text='Ciudad:')
+        self.label_provincia = Label(self, text='Provincia')
+        self.label_cond_fiscal = Label(self, text='Condicion fiscal:')
 
         self.nombre = Entry(self, width=30)
-        self.nombre.grid(column=1, row=0, sticky='w')
-
-        self.label_telefono = Label(self, text='Telefono:')
-        self.label_telefono.grid(column=0, row=1, sticky='e', pady=8)
-
         self.telefono = Entry(self, width=30)
-        self.telefono.grid(column=1, row=1, sticky='w')
-
-        self.label_direccion = Label(self, text='Direccion:')
-        self.label_direccion.grid(column=0, row=2, sticky='e', pady=8)
-
         self.direccion = Entry(self, width=30)
-        self.direccion.grid(column=1, row=2, sticky='w')
-
-        self.label_ciudad = Label(self, text='Ciudad:')
-        self.label_ciudad.grid(column=0, row=3, sticky='e', pady=8)
-
         self.ciudad = Entry(self, width=30)
-        self.ciudad.grid(column=1, row=3, sticky='w')
 
-        self.label_provincia = Label(self, text='Provincia')
-        self.label_provincia.grid(column=0, row=4, sticky='e', pady=8)
-
-        self.desplegable_p = Combobox(self, values=provincias, state="readonly", width=27)
-        self.desplegable_p.current(0)
-        self.desplegable_p.grid(column=1, row=4, sticky='w')
-
-        self.label_cond_fiscal = Label(self, text='Condicion fiscal:')
-        self.label_cond_fiscal.grid(column=0, row=5, sticky='e', pady=8)
-
-        self.desplegable_c = Combobox(self, values=condicion_fiscal, state="readonly", width=27)
-        self.desplegable_c.current(0)
-        self.desplegable_c.grid(column=1, row=5, sticky='w')
+        self.desplegable_p = Combobox(self,
+                                      values=provincias,
+                                      state="readonly",
+                                      width=27)
+        self.desplegable_c = Combobox(self,
+                                      values=condicion_fiscal,
+                                      state="readonly",
+                                      width=27)
 
         self.boton_cargar = Button(self,
                                    text='Cargar',
                                    command=self.crear_cliente)
+
+        self.cargar_widgets()
+
+    @staticmethod
+    def cargar_widgets(self):
+        self.label_nombre.grid(column=0, row=0, sticky='e', pady=8)
+        self.label_telefono.grid(column=0, row=1, sticky='e', pady=8)
+        self.label_direccion.grid(column=0, row=2, sticky='e', pady=8)
+        self.label_ciudad.grid(column=0, row=3, sticky='e', pady=8)
+        self.label_provincia.grid(column=0, row=4, sticky='e', pady=8)
+        self.label_cond_fiscal.grid(column=0, row=5, sticky='e', pady=8)
+
+        self.nombre.grid(column=1, row=0, sticky='w')
+        self.telefono.grid(column=1, row=1, sticky='w')
+        self.direccion.grid(column=1, row=2, sticky='w')
+        self.ciudad.grid(column=1, row=3, sticky='w')
+
+        self.desplegable_p.current(0)
+        self.desplegable_p.grid(column=1, row=4, sticky='w')
+        self.desplegable_c.current(0)
+        self.desplegable_c.grid(column=1, row=5, sticky='w')
+
         self.boton_cargar.place(relx=0.5, rely=0.8, anchor='center')
 
     def crear_cliente(self):
@@ -317,7 +318,6 @@ class ventana_modificar_cliente(Toplevel):
         self.caja = Frame(self)
         self.caja.pack()
 
-        ventana_cargar_cliente.cargar_widgets(self.caja)
 
 principal = programa()
 
