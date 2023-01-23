@@ -2,8 +2,13 @@ from tkinter import *
 from tkinter.ttk import Combobox
 from funciones import *
 
-medidas_principales = {'relx': 0.5, 'rely': 0.5, 'relwidth':0.4, 'relheight': 0.2, 'anchor': 'center'}
-colores_principales = {'bg': '#454545', 'activebackground': '#353535'}
+medidas_principales = {'relx': 0.5, 
+                      'rely': 0.5,
+                      'relwidth':0.4,
+                      'relheight': 0.2,
+                      'anchor': 'center'}
+colores_principales = {'bg': '#454545',
+                       'activebackground': '#353535'}
 provincias = ["Buenos Aries",
               "Ciudad Autonoma de Buenos Aires",
               "Catamarca",
@@ -28,10 +33,10 @@ provincias = ["Buenos Aries",
               "Santiago del Estero",
               "Tierra del Fuego",
               "Tucuman"]
-
 condicion_fiscal = ["Consumidor final",
                     "Monotributista",
                     "Responsable inscripto"]
+
 dark_mode = True
 
 def comprobar_darkmode():
@@ -153,12 +158,22 @@ class caja_multiuso(caja_principal):
         nueva_caja.place(**medidas_principales)
 
     def nueva_ventana(self, boton):
+        nueva = Toplevel(self)
+
         if boton['text'] == 'Cargar':
-            nueva = ventana_cargar_cliente(self)
+            nueva.geometry('400x400')
+            nueva.wm_title('Cargar cliente')
+            caja_cargar_cliente(nueva)
+            
         elif boton['text'] == 'Editar':
-            nueva = ventana_modificar_cliente(self)
-        elif boton['text'] == 'Editar':
-            pass
+            nueva.geometry('400x400')
+            nueva.wm_title('Modificar cliente')
+            caja_modificar_cliente(nueva)
+
+        elif boton['text'] == 'Listar':
+            nueva.geometry('1000x400')
+            nueva.wm_title('Listar clientes')
+            caja_listar_clientes(nueva)
 
     def cargar_widgets(self):
         self.img_cargar = PhotoImage(file='.media\\cargar.png')
@@ -182,12 +197,13 @@ class caja_multiuso(caja_principal):
                             border=0,
                             command=lambda: self.nueva_ventana(self.boton_3))
 
-
-class ventana_cargar_cliente(Toplevel):
+class caja_cargar_cliente(Frame):
     def __init__(self, master=None):
         super().__init__(master)
-        self.wm_title('Cargar cliente')
-        self.geometry('400x400')
+        self.pack(expand=True, fill='both')
+
+        self.clientes = cargar('clientes')
+        self.nombres = [cliente.nombre for cliente in self.clientes]
 
         self.label_nombre = Label(self, text='Nombre completo:')
         self.label_telefono = Label(self, text='Telefono:')
@@ -216,7 +232,6 @@ class ventana_cargar_cliente(Toplevel):
 
         self.cargar_widgets()
 
-    @staticmethod
     def cargar_widgets(self):
         self.label_nombre.grid(column=0, row=0, sticky='e', pady=8)
         self.label_telefono.grid(column=0, row=1, sticky='e', pady=8)
@@ -238,6 +253,23 @@ class ventana_cargar_cliente(Toplevel):
         self.boton_cargar.place(relx=0.5, rely=0.8, anchor='center')
 
     def crear_cliente(self):
+        cliente = cli(id=int(1),
+                      nombre=self.nombre.get(),
+                      telefono=self.telefono.get(),
+                      direccion=self.direccion.get(),
+                      ciudad=self.ciudad.get(),
+                      provincia=self.desplegable_p.get(),
+                      cond_fiscal=self.desplegable_c.get())
+
+        if self.nombre.get() in self.nombres:
+            messagebox.showerror('Error',
+                                 f'El cliente "{self.nombre.get()}" ya existe.')
+            return
+        elif self.nombre.get() == '':
+            messagebox.showerror('Error',
+                                 'El nombre de cliente es obligatorio')
+            return
+
         try:
             f = open('clientes.pkl', 'rb')
             while True:
@@ -246,24 +278,19 @@ class ventana_cargar_cliente(Toplevel):
                 except EOFError:
                     f.close()
                     i = x.ID + 1
+                    cliente.ID = i
                     break
-        except FileNotFoundError: i = int(1)
-
-        cliente = cli(id=i,
-                      nombre=self.nombre.get(),
-                      telefono=self.telefono.get(),
-                      direccion=self.direccion.get(),
-                      ciudad=self.ciudad.get(),
-                      provincia=self.desplegable_p.get(),
-                      cond_fiscal=self.desplegable_c.get())
+        except FileNotFoundError: pass
 
         #self.crear_directorios(self.nombre.get())
 
         with open('clientes.pkl', 'ab') as f:
             pickle.dump(cliente, f)
         
-        messagebox.showinfo(message='El cliente se ha creado con exito',
-                            title='Cliente')
+        messagebox.showinfo('Cliente',
+                            'El cliente se ha creado con exito')
+
+        self.master.destroy()
 
     def crear_directorios(self):
         os.chdir('..')
@@ -295,29 +322,86 @@ def cargar(clase: str):
     return lista
 
 
-class ventana_modificar_cliente(Toplevel):
+class caja_modificar_cliente(caja_cargar_cliente):
     def __init__(self, master=None):
         super().__init__(master)
-        self.wm_title('Modificar cliente')
-        self.geometry('400x200')
+
+    def cargar_widgets(self):
+        if len(self.clientes) == 0:
+            messagebox.showinfo('Sin clientes',
+                                'No hay clientes cargados')
+            self.master.destroy()
+            return
+
+        self.pregunta = Label(self, text='Que cliente desea modificar?')
+        self.pregunta.pack()
+
+        self.desplegable_nombres = Combobox(self, values=self.nombres, state="readonly")
+        self.desplegable_nombres.bind("<<ComboboxSelected>>", self.opciones)
+        self.desplegable_nombres.pack()
+
+    def opciones(self, event):
+        self.indice = self.desplegable_nombres.current()
+        indice_prov = provincias.index(self.clientes[self.indice].provincia)
+        indice_cond = condicion_fiscal.index(self.clientes[self.indice].cond_fiscal)
+
+        self.caja_secundaria = caja_cargar_cliente(self)
+
+        self.caja_secundaria.label_nombre.destroy()
+        self.caja_secundaria.nombre.destroy()
+
+        self.caja_secundaria.telefono.insert(0, self.clientes[self.indice].telefono)
+        self.caja_secundaria.direccion.insert(0, self.clientes[self.indice].direccion)
+        self.caja_secundaria.ciudad.insert(0, self.clientes[self.indice].ciudad)
+
+        self.caja_secundaria.desplegable_p.current(indice_prov)
+        self.caja_secundaria.desplegable_c.current(indice_cond)
+
+        self.caja_secundaria.boton_cargar.config(text='Modificar',
+                                                 command=self.modificar)
+
+    def modificar(self):
+        self.clientes[self.indice].telefono = self.caja_secundaria.telefono.get()
+        self.clientes[self.indice].direccion = self.caja_secundaria.direccion.get()
+        self.clientes[self.indice].ciudad = self.caja_secundaria.ciudad.get()
+        self.clientes[self.indice].provincia = self.caja_secundaria.desplegable_p.get()
+        self.clientes[self.indice].cond_fiscal = self.caja_secundaria.desplegable_c.get()
+
+        with open('clientes.pkl', 'wb') as f:
+            for cliente in self.clientes:
+                pickle.dump(cliente, f)
+
+        messagebox.showinfo('Exito',
+                            'El cliente se ha modificado con exito')
+        self.master.destroy()
+
+
+class caja_listar_clientes(Frame):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.pack(expand=True, fill='both')
 
         self.clientes = cargar('clientes')
-        self.nombres = [cliente.nombre for cliente in self.clientes]
+
+        self.label_id = Label(self, text='ID')
+        self.label_nombre = Label(self, text='Nombre')
+        self.label_telefono = Label(self, text='Telefono')
+        self.label_direccion = Label(self, text='Direccion')
+        self.label_ciudad = Label(self, text='Ciudad')
+        self.label_provincia = Label(self, text='Provincia')
+        self.label_cond_fiscal = Label(self, text='Condicion fiscal')
 
         self.cargar_widgets()
 
     def cargar_widgets(self):
-        self.pregunta = Label(self, text='Que cliente desea modificar?')
-        self.pregunta.pack()
+        col = 0
+        for widget in self.winfo_children():
+            widget.grid(column=col, row=0)
+            self.columnconfigure(col, weight=1, pad=100)
+            col +=1
 
-        self.desplegable_c = Combobox(self, values=self.nombres, state="readonly")
-        self.desplegable_c.bind("<<ComboboxSelected>>", self.opciones)
-        self.desplegable_c.pack()
-
-    def opciones(self, event):
-        self.caja = Frame(self)
-        self.caja.pack()
-
+        for cliente in self.clientes:
+            
 
 principal = programa()
 

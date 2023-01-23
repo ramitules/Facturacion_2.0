@@ -2,7 +2,7 @@ class cli:
 	def __init__(self,
 			  id: int,
 			  nombre: str,
-			  telefono: int,
+			  telefono: str,
 			  direccion: str,
 			  ciudad: str,
 			  provincia: str,

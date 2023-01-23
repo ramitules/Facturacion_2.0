@@ -12,55 +12,6 @@ def volver():
         except FileNotFoundError: os.chdir('..')
 
 
-def menu_modificar_cliente(indice: int, cl: list):
-    while True:
-        print('1. Cambiar nombre',
-                '\n2. ELIMINAR',
-                '\n0. Volver')
-        opc2 = input('Seleccione opcion: ')
-        if opc2 == '0': return False
-
-        elif opc2 == '1':
-            cl[indice].nombre = input('Nombre: ')
-            print('El cliente se ha modificado con exito!')
-            break
-
-        elif opc2 == '2':
-            print('Seguro que desea eliminar el cliente?')
-            x = input('1.SI - 2.NO: ')
-            if x == '1':
-                del cl[indice]
-                print('El cliente se ha eliminado con exito')
-                break
-
-        else: input('Opcion incorrecta, presione ENTER y vuelva a intentar')
-
-    with open('clientes.pkl', 'wb') as f:
-        for cliente in cl:
-            pickle.dump(cliente, f)
-    return True
-
-
-
-def modificar_cliente():
-    clientes = []
-    cargar(clientes, 'clientes')
-    if len(clientes) == 0:
-        print('No hay clientes para modificar')
-        return False
-
-    for cliente in clientes:
-        print(cliente)
-
-    opc = int(input('Que cliente desea modificar? '))
-    opc -= 1
-    continuar = menu_modificar_cliente(opc, clientes)
-    if continuar == True:
-        return True
-    else:
-        print('Ha ocurrido un error')
-        return False
-
 def listar_clientes():
     clientes = []
     cargar(clientes, 'clientes')
