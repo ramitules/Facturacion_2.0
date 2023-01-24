@@ -1,3 +1,5 @@
+from datetime import date
+
 medidas_principales = {'relx': 0.5, 
                       'rely': 0.5,
                       'relwidth':0.4,
@@ -37,3 +39,5 @@ condicion_fiscal = ["Consumidor final",
                     "Responsable inscripto"]
 
 dark_mode = True
+
+fecha_actual = date.today()
