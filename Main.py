@@ -1,6 +1,7 @@
 from variables_globales import *
 from tkinter import TOP, Button, Frame, PhotoImage, Tk, Toplevel
 from Clientes import caja_cargar_cliente, caja_modificar_cliente, caja_listar_clientes
+from Articulos import caja_cargar_articulo, caja_modificar_articulo, caja_listar_articulos
 
 
 class programa(Tk):
@@ -76,11 +77,20 @@ class caja_principal(Frame):
 
         self.cargar_widgets()
 
-    def cambiar(self):
+    def cambiar(self, boton):
         self.destroy()
 
-        nueva_caja = caja_multiuso(self.master)
-        nueva_caja.place(**medidas_principales)
+        if boton == 'Ventas':
+            nueva_caja = caja_multiuso(self.master, 'Ventas')
+            nueva_caja.place(**medidas_principales)
+
+        elif boton == 'Clientes':
+            nueva_caja = caja_multiuso(self.master, 'Clientes')
+            nueva_caja.place(**medidas_principales)
+
+        elif boton == 'Articulos':
+            nueva_caja = caja_multiuso(self.master, 'Articulos')
+            nueva_caja.place(**medidas_principales)
 
     def cargar_widgets(self):
         self.img_ventas = PhotoImage(file='.media\\venta.png')
@@ -88,26 +98,28 @@ class caja_principal(Frame):
                             text='Ventas',
                             compound=TOP,
                             border=0,
-                            command=self.cambiar)
+                            command=lambda: self.cambiar(self.boton_1['text']))
         
         self.img_clientes = PhotoImage(file='.media\\cliente.png')
         self.boton_2.config(image=self.img_clientes,
                             text='Clientes',
                             compound=TOP,
                             border=0,
-                            command=self.cambiar)
+                            command=lambda: self.cambiar(self.boton_2['text']))
         
         self.img_articulos = PhotoImage(file='.media\\articulo.png')
         self.boton_3.config(image=self.img_articulos,
                             text='Articulos',
                             compound=TOP,
                             border=0,
-                            command=self.cambiar)
+                            command=lambda: self.cambiar(self.boton_3['text']))
         
 
 class caja_multiuso(caja_principal):
-    def __init__(self, master=None):
+    def __init__(self, master=None, clase: str = ...):
         super().__init__(master)
+
+        self.clase = clase
 
         self.boton_atras = Button(self)
         self.boton_atras.config(**colores_principales,
@@ -125,20 +137,38 @@ class caja_multiuso(caja_principal):
     def nueva_ventana(self, boton):
         nueva = Toplevel(self)
 
-        if boton['text'] == 'Cargar':
+        if boton == 'Cargar':
             nueva.geometry('400x400')
-            nueva.wm_title('Cargar cliente')
-            caja_cargar_cliente(nueva)
-            
-        elif boton['text'] == 'Editar':
-            nueva.geometry('400x400')
-            nueva.wm_title('Modificar cliente')
-            caja_modificar_cliente(nueva)
 
-        elif boton['text'] == 'Listar':
-            nueva.geometry('1280x400')
-            nueva.wm_title('Listar clientes')
-            caja_listar_clientes(nueva)
+            if self.clase == 'Clientes':
+                nueva.wm_title('Cargar cliente')
+                caja_cargar_cliente(nueva)
+
+            elif self.clase == 'Articulos':
+                nueva.wm_title('Cargar articulo')
+                caja_cargar_articulo(nueva)
+            
+        elif boton == 'Editar':
+            nueva.geometry('400x400')
+
+            if self.clase == 'Clientes':
+                nueva.wm_title('Modificar cliente')
+                caja_modificar_cliente(nueva)
+
+            elif self.clase == 'Articulos':
+                nueva.wm_title('Modificar articulo')
+                caja_modificar_articulo(nueva)
+
+        elif boton == 'Listar':
+            if self.clase == 'Clientes':
+                nueva.geometry('1280x400')
+                nueva.wm_title('Listar clientes')
+                caja_listar_clientes(nueva)
+
+            elif self.clase == 'Articulos':
+                nueva.geometry('640x400')
+                nueva.wm_title('Listar clientes')
+                caja_listar_articulos(nueva)
 
     def cargar_widgets(self):
         self.img_cargar = PhotoImage(file='.media\\cargar.png')
@@ -146,21 +176,21 @@ class caja_multiuso(caja_principal):
                             text='Cargar',
                             compound=TOP,
                             border=0,
-                            command=lambda: self.nueva_ventana(self.boton_1))
+                            command=lambda: self.nueva_ventana(self.boton_1['text']))
 
         self.img_editar = PhotoImage(file='.media\\editar.png')
         self.boton_2.config(image=self.img_editar,
                             text='Editar',
                             compound=TOP,
                             border=0,
-                            command=lambda: self.nueva_ventana(self.boton_2))
+                            command=lambda: self.nueva_ventana(self.boton_2['text']))
 
         self.img_listar = PhotoImage(file='.media\\listar.png')
         self.boton_3.config(image=self.img_listar,
                             text='Listar',
                             compound=TOP,
                             border=0,
-                            command=lambda: self.nueva_ventana(self.boton_3))
+                            command=lambda: self.nueva_ventana(self.boton_3['text']))
 
 principal = programa()
 

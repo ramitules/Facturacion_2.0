@@ -1,4 +1,5 @@
 import pickle
+from tkinter.ttk import Combobox
 from funciones import cargar
 from tkinter import Button, Entry, Frame, Label, messagebox
 
@@ -30,6 +31,10 @@ class caja_cargar_articulo(Frame):
 		super().__init__(master)
 		self.pack(expand=True, fill='both')
 
+		self.articulos = cargar('articulos')
+		self.descripciones = [articulo.descripcion for articulo in self.articulos]
+
+
 		self.label_descripcion = Label(self, text='Descripcion: ')
 		self.label_conteo = Label(self, text='Conteo: ')
 		self.label_precio = Label(self, text='Precio unitario: $')
@@ -59,10 +64,7 @@ class caja_cargar_articulo(Frame):
 					   conteo=self.conteo.get(),
 					   precio_unitario=int(self.precio.get()))
 
-		articulos = cargar('articulos')
-		descripciones = [articulo.descripcion for articulo in articulos]
-
-		if self.descripcion.get() in descripciones:
+		if self.descripcion.get() in self.descripciones:
 			messagebox.showerror('Error',
 								 f'El articulo "{self.descripcion.get()}" ya existe.')
 			return
@@ -91,3 +93,80 @@ class caja_cargar_articulo(Frame):
 							'El articulo se ha creado con exito')
 
 		self.master.destroy()
+
+class caja_modificar_articulo(caja_cargar_articulo):
+	def __init__(self, master=None):
+		super().__init__(master)
+
+	def cargar_widgets(self):
+		if len(self.articulos) == 0:
+			messagebox.showinfo('Sin articulos',
+								'No hay articulos cargados')
+			self.master.destroy()
+			return
+
+		self.pregunta = Label(self, text='Que articulo desea modificar?')
+		self.pregunta.pack()
+
+		self.desplegable_descripciones = Combobox(self,
+												  values=self.descripciones,
+												  state='readonly')
+		self.desplegable_descripciones.bind('<<ComboboxSelected>>', self.opciones)
+		self.desplegable_descripciones.pack()
+
+	def opciones(self, event):
+		self.indice = self.desplegable_descripciones.current()
+
+		self.caja_secundaria = caja_cargar_articulo(self)
+
+		self.caja_secundaria.label_descripcion.destroy()
+		self.caja_secundaria.descripcion.destroy()
+
+		self.caja_secundaria.conteo.insert(0, self.articulos[self.indice].conteo)
+		self.caja_secundaria.precio.insert(0, self.articulos[self.indice].precio_unitario)
+
+		self.caja_secundaria.boton_cargar.config(text='Modificar',
+												 command=self.modificar)
+
+	def modificar(self):
+		self.articulos[self.indice].conteo = self.caja_secundaria.conteo.get()
+		self.articulos[self.indice].precio_unitario = self.caja_secundaria.precio.get()
+
+		with open('articulos.pkl', 'wb') as f:
+			for articulo in self.articulos:
+				pickle.dump(articulo, f)
+
+		messagebox.showinfo('Exito',
+							'El articulo se ha modificado con exito')
+
+		self.master.destroy()
+
+class caja_listar_articulos(Frame):
+	def __init__(self, master=None):
+		super().__init__(master)
+		self.pack(expand=True, fill='both')
+
+		self.articulos = cargar('articulos')
+
+		self.label_id = Label(self, text='ID')
+		self.label_descripcion = Label(self, text='Descripcion')
+		self.label_conteo = Label(self, text='Conteo')
+		self.label_precio = Label(self, text='Precio unitario')
+
+		self.cargar_widgets()
+
+	def cargar_widgets(self):
+		for i, widget in enumerate(self.winfo_children()):
+			widget.grid(column=i, row=0)
+			self.columnconfigure(i, weight=1, pad=100)
+
+		for i, articulo in enumerate(self.articulos, 1):
+			label1 = Label(self, text=str(articulo.ID))
+			label2 = Label(self, text=articulo.descripcion)
+			label3 = Label(self, text=articulo.conteo)
+			label4 = Label(self, text='$' + str(articulo.precio_unitario))
+
+			label1.grid(column=0, row=i)
+			label2.grid(column=1, row=i)
+			label3.grid(column=2, row=i)
+			label4.grid(column=3, row=i)

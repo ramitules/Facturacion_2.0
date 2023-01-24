@@ -45,6 +45,9 @@ class caja_cargar_cliente(Frame):
         super().__init__(master)
         self.pack(expand=True, fill='both')
 
+        self.clientes = cargar('clientes')
+        self.nombres = [cliente.nombre for cliente in self.clientes]
+
         self.label_nombre = Label(self, text='Nombre completo:')
         self.label_telefono = Label(self, text='Telefono:')
         self.label_direccion = Label(self, text='Direccion:')
@@ -95,10 +98,7 @@ class caja_cargar_cliente(Frame):
                       provincia=self.desplegable_p.get(),
                       cond_fiscal=self.desplegable_c.get())
 
-        clientes = cargar('clientes')
-        nombres = [cliente.nombre for cliente in clientes]
-
-        if self.nombre.get() in nombres:
+        if self.nombre.get() in self.nombres:
             messagebox.showerror('Error',
                                  f'El cliente "{self.nombre.get()}" ya existe.')
             return
@@ -148,10 +148,7 @@ class caja_cargar_cliente(Frame):
 
 class caja_modificar_cliente(caja_cargar_cliente):
     def __init__(self, master=None):
-        super().__init__(master)
-
-        self.clientes = cargar('clientes')
-        self.nombres = [cliente.nombre for cliente in self.clientes]
+        super().__init__(master)        
 
     def cargar_widgets(self):
         if len(self.clientes) == 0:
@@ -200,6 +197,7 @@ class caja_modificar_cliente(caja_cargar_cliente):
 
         messagebox.showinfo('Exito',
                             'El cliente se ha modificado con exito')
+
         self.master.destroy()
 
 
