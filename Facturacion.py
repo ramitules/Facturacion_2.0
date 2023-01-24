@@ -171,7 +171,7 @@ class caja_multiuso(caja_principal):
             caja_modificar_cliente(nueva)
 
         elif boton['text'] == 'Listar':
-            nueva.geometry('1000x400')
+            nueva.geometry('1280x400')
             nueva.wm_title('Listar clientes')
             caja_listar_clientes(nueva)
 
@@ -394,13 +394,27 @@ class caja_listar_clientes(Frame):
         self.cargar_widgets()
 
     def cargar_widgets(self):
-        col = 0
-        for widget in self.winfo_children():
-            widget.grid(column=col, row=0)
-            self.columnconfigure(col, weight=1, pad=100)
-            col +=1
+        for i, widget in enumerate(self.winfo_children()):
+            widget.grid(column=i, row=0)
+            self.columnconfigure(i, weight=1, pad=100)
 
-        for cliente in self.clientes:
+        for i, cliente in enumerate(self.clientes, 1):
+            label1 = Label(self, text=str(cliente.ID))
+            label2 = Label(self, text=cliente.nombre)
+            label3 = Label(self, text=cliente.telefono)
+            label4 = Label(self, text=cliente.direccion)
+            label5 = Label(self, text=cliente.ciudad)
+            label6 = Label(self, text=cliente.provincia)
+            label7 = Label(self, text=cliente.cond_fiscal)
+
+            label1.grid(column=0, row=i)
+            label2.grid(column=1, row=i)
+            label3.grid(column=2, row=i)
+            label4.grid(column=3, row=i)
+            label5.grid(column=4, row=i)
+            label6.grid(column=5, row=i)
+            label7.grid(column=6, row=i)
+
             
 
 principal = programa()
