@@ -33,12 +33,12 @@ class caja_cargar_factura(Frame):
                                       state='readonly',
                                       width=30)
 
-        self.enc_ID = Label(self.frame_IDs, text='ID\n')
+        self.enc_ID = Label(self.frame_IDs, text='ID')
         self.enc_descripcion = Label(self.frame_descripciones, text='Descripcion')
-        self.enc_conteo = Label(self.frame_conteos, text='Conteo\n')
-        self.enc_cantidad = Label(self.frame_cantidades, text='Cantidad\n')
-        self.enc_p_unitario = Label(self.frame_precios, text='Precio unitario\n')
-        self.enc_total = Label(self.frame_totales, text='Total\n')
+        self.enc_conteo = Label(self.frame_conteos, text='Conteo')
+        self.enc_cantidad = Label(self.frame_cantidades, text='Cantidad')
+        self.enc_p_unitario = Label(self.frame_precios, text='Precio unitario')
+        self.enc_total = Label(self.frame_totales, text='Total')
 
         self.label_id = Label(self.frame_IDs)
         self.label_conteo = Label(self.frame_conteos)
