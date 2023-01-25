@@ -2,7 +2,7 @@ from variables_globales import *
 from tkinter import TOP, Button, Frame, PhotoImage, Tk, Toplevel
 from Clientes import caja_cargar_cliente, caja_modificar_cliente, caja_listar_clientes
 from Articulos import caja_cargar_articulo, caja_modificar_articulo, caja_listar_articulos
-
+from Facturas import caja_cargar_factura
 
 class programa(Tk):
     def __init__(self):
@@ -138,13 +138,20 @@ class caja_multiuso(caja_principal):
         nueva = Toplevel(self)
 
         if boton == 'Cargar':
-            nueva.geometry('400x400')
+            
 
-            if self.clase == 'Clientes':
+            if self.clase == 'Ventas':
+                nueva.geometry('960x480')
+                nueva.wm_title('Nueva factura')
+                caja_cargar_factura(nueva)
+
+            elif self.clase == 'Clientes':
+                nueva.geometry('400x400')
                 nueva.wm_title('Cargar cliente')
                 caja_cargar_cliente(nueva)
 
             elif self.clase == 'Articulos':
+                nueva.geometry('400x400')
                 nueva.wm_title('Cargar articulo')
                 caja_cargar_articulo(nueva)
             

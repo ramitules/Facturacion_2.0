@@ -3,207 +3,228 @@ from tkinter.ttk import Combobox
 from variables_globales import fecha_actual
 from funciones import cargar,volver
 from openpyxl import *
-from tkinter import Frame, Label, filedialog
+from tkinter import Entry, Frame, Label, filedialog
 
 class caja_cargar_factura(Frame):
     def __init__(self, master=None):
         super().__init__(master)
+        self.pack(expand=True, fill='both')
 
         self.plantilla = load_workbook('Plantilla.xlsx')
         self.nueva_factura = self.plantilla
         self.hoja = self.nueva_factura.active
 
         self.articulos = cargar('articulos')
-        self.articulos_descripcion = [articulo.descripcion for articulo in self.articulos]
-
         self.clientes = cargar('clientes')
-        self.nombre_clientes = [cliente.nombre for cliente in self.clientes]
 
-        self.label_cliente = Label(self, text='Seleccione el cliente')
-        self.selec_cliente = Combobox(self,
-                                      values=self.nombre_clientes,
+        self.frame_cliente = Frame(self)
+        self.frame_encabezados = Frame(self)
+        self.frame_articulos = Frame(self)
+
+
+        self.label_cliente = Label(self.frame_cliente, text='Seleccione el cliente')
+        self.selec_cliente = Combobox(self.frame_cliente,
+                                      values=[cliente.nombre for cliente in self.clientes],
                                       state='readonly',
                                       width=30)
 
-        self.frame_articulos = Frame(self)
+        self.enc_articulo = Label(self.frame_encabezados, text='ID')
+        self.enc_descripcion = Label(self.frame_encabezados, text='Descripcion')
+        self.enc_conteo = Label(self.frame_encabezados, text='Conteo')
+        self.enc_p_unitario = Label(self.frame_encabezados, text='Precio unitario')
+        self.enc_total = Label(self.frame_encabezados, text='Total')
+        
+        self.cargar_widgets()
 
-    def cargar_widget(self):
-        self.label_cliente.pack()
-        self.selec_cliente.pack()
+    def cargar_widgets(self):
+        self.frame_cliente.pack(expand=True, fill='both', pady=20)
+        self.frame_encabezados.pack(anchor='s', expand=True, fill='x')
         self.frame_articulos.pack(expand=True, fill='both')
 
-        for x in range(13):
-            indice = str(x+5)
-            self.rowconfigure(x, pad=10, weight=1)
+        self.label_cliente.pack(anchor='center')
+        self.selec_cliente.pack(anchor='center')
+        self.selec_cliente.bind('<<ComboboxSelected>>', self.cargar_articulos)
 
-            self.selec_articulo = Combobox(self.frame_articulos,
-                                           values=self.articulos_descripcion,
-                                           state='readonly',
-                                           width=30)
+    def cargar_articulos(self, event):
+        for i, widget in enumerate(self.frame_articulos.winfo_children()):
+            widget.grid(column=i, row=0)
+            self.frame_encabezados.columnconfigure(i, weight=1, pad=100)
 
-            self.selec_articulo.grid(column=0, row=x) #AQUI
+        for x in range(6):
+            self.frame_articulos.columnconfigure(x, weight=1, pad=100)
 
-    def crear_factura(self):
-        self.hoja['G2'] = fecha_actual
-        self.hoja['C2'] = self.selec_cliente.get()
-        #os.chdir('..')
-        #os.chdir(f'Optitex\\{clientes[opc].nombre}')
-        acumular = float(0)
-        print('\nPrimer articulo')
-        for x in range(13):
-            indice = str(x+5)
+        self.frame_articulos.rowconfigure(0, pad=1, weight=1)
+        self.selec_articulo = Combobox(self.frame_articulos,
+                                        values=[articulo.descripcion for articulo in self.articulos],
+                                        state='readonly',
+                                        width=20)
+        self.selec_articulo.bind('<<ComboboxSelected>>', self.cargar_items)
+        self.selec_articulo.grid(column=1, row=0)
 
-            for articulo in articulos:
-                print(articulo)
+    def cargar_items(self, event, indice=0):
+        self.label_id = Label(self.frame_articulos, text=self.articulos[self.selec_articulo.current()].ID)
+        self.entry_conteo = Entry(self.frame_articulos, width=20)
+        self.label_conteo = Label(self.frame_articulos, text=self.articulos[self.selec_articulo.current()].conteo)
+        self.label_precio = Label(self.frame_articulos, text=self.articulos[self.selec_articulo.current()].precio_unitario)
+        self.total = Label(self.frame_articulos)
+        
+        self.label_id.grid(column=0, row=indice)
+        self.entry_conteo.bind('<FocusOut>', self.calcular_total)
+        self.entry_conteo.grid(column=2, row=indice)
+        self.label_conteo.grid(column=3, row=indice)
+        self.label_precio.grid(column=4, row=indice)
+        self.total.grid(column=5, row=indice)
 
-            opc = int(input('Opcion: '))
-            opc -= 1
+    def calcular_total(self, event):
+        unidades = float(self.entry_conteo.get())
+        precio = float(self.label_precio['text'])
+        total = unidades * precio
+        self.total['text'] = total
 
-            hoja['B'+indice] = articulos[opc].ID
-            hoja['C'+indice] = articulos[opc].descripcion
-            hoja['D'+indice] = articulos[opc].conteo
+#    def crear_factura(self):
+#        self.hoja['G2'] = fecha_actual
+#        self.hoja['C2'] = self.selec_cliente.get()
+#        #os.chdir('..')
+#        #os.chdir(f'Optitex\\{clientes[opc].nombre}')
+#        acumular = float(0)
+#        print('\nPrimer articulo')
+#        for x in range(13):
+#            indice = str(x+5)
 
-            print(articulos[opc].conteo, end = " ")
-            cant = float(input('cantidad: '))
+#            for articulo in articulos:
+#                print(articulo)
 
-            hoja['E'+indice] = cant
-            hoja['F'+indice] = articulos[opc].precio_unitario
-            hoja['G'+indice] = cant * articulos[opc].precio_unitario
-            acumular += (cant * articulos[opc].precio_unitario)
+#            opc = int(input('Opcion: '))
+#            opc -= 1
 
-            print("\nAgregar mas articulos?")
-            opc = input("1.SI  2.NO: ")
-            if opc == '2': break
+#            hoja['B'+indice] = articulos[opc].ID
+#            hoja['C'+indice] = articulos[opc].descripcion
+#            hoja['D'+indice] = articulos[opc].conteo
 
-        hoja['G18'] = acumular
-        archivoMRK = seleccionar_mark()
+#            print(articulos[opc].conteo, end = " ")
+#            cant = float(input('cantidad: '))
 
-        hoja['B19'] = str("Observaciones: archivo " + archivoMRK)
-        os.chdir('Facturas')
-        nueva_factura.save(f'{archivoMRK}.xlsx')
-        os.startfile(f'{archivoMRK}.xlsx')
+#            hoja['E'+indice] = cant
+#            hoja['F'+indice] = articulos[opc].precio_unitario
+#            hoja['G'+indice] = cant * articulos[opc].precio_unitario
+#            acumular += (cant * articulos[opc].precio_unitario)
 
-        print("Factura creada con exito")
-        volver()
+#            print("\nAgregar mas articulos?")
+#            opc = input("1.SI  2.NO: ")
+#            if opc == '2': break
 
-def seleccionar_mark():
-    os.system("cls")
-    input('A continuacion vas a poder seleccionar el archivo MARK que utilizaste. Presiona ENTER para continuar')
+#        hoja['G18'] = acumular
+#        archivoMRK = seleccionar_mark()
 
-    archivo = filedialog.askopenfilename(title='Seleccionar archivo de marcada', filetypes=[('Archivo Mark','*.MRK')])
-    archivoMRK1 = os.path.basename(archivo)
-    archivoMRK = archivoMRK1.replace('.MRK','')
+#        hoja['B19'] = str("Observaciones: archivo " + archivoMRK)
+#        os.chdir('Facturas')
+#        nueva_factura.save(f'{archivoMRK}.xlsx')
+#        os.startfile(f'{archivoMRK}.xlsx')
 
-    if len(archivoMRK) == 0:
-        return 'error'
-    else:
-        print(archivoMRK)
-        return archivoMRK
+#        print("Factura creada con exito")
+#        volver()
 
-def listar_facturas(periodo: str, fac: list):
-    acum = float(0)
-    ahora = datetime.now()
+#def seleccionar_mark():
+#    os.system("cls")
+#    input('A continuacion vas a poder seleccionar el archivo MARK que utilizaste. Presiona ENTER para continuar')
 
-    for factura in fac:
-        try:
-            aux = load_workbook(factura)
-            hoja_aux = aux.active
-            fecha_factura = hoja_aux['G2'].value
+#    archivo = filedialog.askopenfilename(title='Seleccionar archivo de marcada', filetypes=[('Archivo Mark','*.MRK')])
+#    archivoMRK1 = os.path.basename(archivo)
+#    archivoMRK = archivoMRK1.replace('.MRK','')
 
-            if periodo == 'semanal':
-                semana = ahora.isocalendar()[1]
-                semana_factura = fecha_factura.isocalendar()[1]
+#    if len(archivoMRK) == 0:
+#        return 'error'
+#    else:
+#        print(archivoMRK)
+#        return archivoMRK
 
-                if semana_factura == semana:
-                    print(factura, ', $', hoja_aux['G18'].value)
-                    acum += hoja_aux['G18'].value
-                    aux.close()
-            else:
-                mes = ahora.month
-                mes_factura = fecha_factura.month
+#def listar_facturas(periodo: str, fac: list):
+#    acum = float(0)
+#    ahora = datetime.now()
 
-                if mes_factura == mes:
-                    print(factura, ', $', hoja_aux['G18'].value)
-                    acum += hoja_aux['G18'].value
-                    aux.close()
-        except: pass
-    return acum
+#    for factura in fac:
+#        try:
+#            aux = load_workbook(factura)
+#            hoja_aux = aux.active
+#            fecha_factura = hoja_aux['G2'].value
 
-def resumen_general(periodo: str, clientes: list):
-    acumular = float(0)
+#            if periodo == 'semanal':
+#                semana = ahora.isocalendar()[1]
+#                semana_factura = fecha_factura.isocalendar()[1]
 
-    for cliente in clientes:
-        suma_cliente = float(0)
-        print(f'{cliente.nombre}')
+#                if semana_factura == semana:
+#                    print(factura, ', $', hoja_aux['G18'].value)
+#                    acum += hoja_aux['G18'].value
+#                    aux.close()
+#            else:
+#                mes = ahora.month
+#                mes_factura = fecha_factura.month
 
-        os.chdir('..')
+#                if mes_factura == mes:
+#                    print(factura, ', $', hoja_aux['G18'].value)
+#                    acum += hoja_aux['G18'].value
+#                    aux.close()
+#        except: pass
+#    return acum
 
-        try: os.chdir(f'Optitex\\{cliente.nombre}\\Facturas')
-        except FileNotFoundError: input(f'El cliente {cliente.nombre} no tiene carpeta de facturas. Presione ENTER para continuar')
+#def resumen_general(periodo: str, clientes: list):
+#    acumular = float(0)
 
-        facturas = os.listdir()
-        suma_cliente += listar_facturas(periodo, facturas)
-        acumular += suma_cliente
-        print('Total:  $', suma_cliente)
-        print('_________________________________')
-        volver()
+#    for cliente in clientes:
+#        suma_cliente = float(0)
+#        print(f'{cliente.nombre}')
 
-    print(f'Total {periodo} acumulado: $', acumular)
+#        os.chdir('..')
 
-def resumen_por_cliente(periodo: str, clientes: list):
-    acumular = float(0)
+#        try: os.chdir(f'Optitex\\{cliente.nombre}\\Facturas')
+#        except FileNotFoundError: input(f'El cliente {cliente.nombre} no tiene carpeta de facturas. Presione ENTER para continuar')
 
-    for cliente in clientes:
-        print(cliente)
-    opc = int(input('Seleccione cliente: '))
-    opc -=1
+#        facturas = os.listdir()
+#        suma_cliente += listar_facturas(periodo, facturas)
+#        acumular += suma_cliente
+#        print('Total:  $', suma_cliente)
+#        print('_________________________________')
+#        volver()
 
-    os.chdir('..')
-    os.chdir(f'Optitex\\{clientes[opc].nombre}\\Facturas')
-    facturas = os.listdir()
+#    print(f'Total {periodo} acumulado: $', acumular)
 
-    acumular += listar_facturas(periodo, facturas)
+#def resumen_por_cliente(periodo: str, clientes: list):
+#    acumular = float(0)
 
-    print(f'Total {periodo} acumulado, cliente {clientes[opc].nombre}: $', acumular)
-    print('_________________________________')
-    volver()
+#    for cliente in clientes:
+#        print(cliente)
+#    opc = int(input('Seleccione cliente: '))
+#    opc -=1
 
-def resumen(periodo: str):
-    clientes = []
-    cargar(clientes, 'clientes')
+#    os.chdir('..')
+#    os.chdir(f'Optitex\\{clientes[opc].nombre}\\Facturas')
+#    facturas = os.listdir()
 
-    while True:
-        os.system('cls')
-        print(f'1. Resumen {periodo} general')
-        print(f'2. Resumen {periodo} por cliente')
-        print('0. Volver\n')
-        opc = input('Opcion: ')
+#    acumular += listar_facturas(periodo, facturas)
 
-        if opc == '0': return
+#    print(f'Total {periodo} acumulado, cliente {clientes[opc].nombre}: $', acumular)
+#    print('_________________________________')
+#    volver()
 
-        elif opc == '1':
-            resumen_general(periodo, clientes)
-            break
+#def resumen(periodo: str):
+#    clientes = []
+#    cargar(clientes, 'clientes')
 
-        elif opc == '2':
-            resumen_por_cliente(periodo, clientes)
-            break
+#    while True:
+#        os.system('cls')
+#        print(f'1. Resumen {periodo} general')
+#        print(f'2. Resumen {periodo} por cliente')
+#        print('0. Volver\n')
+#        opc = input('Opcion: ')
 
-        else: input('Opcion incorrecta, presione ENTER y vuelva a intentar')
+#        if opc == '0': return
 
-def menu_facturas():
-    while True:
-        os.system("cls")
-        print("Elija una opcion")
-        print("1. Crear factura")
-        print("2. Resumen semanal")
-        print("3. Resumen mensual")
-        print("0. Volver al menu principal\n")
-        opc = input('Opcion: ')
+#        elif opc == '1':
+#            resumen_general(periodo, clientes)
+#            break
 
-        if opc == '0': break
-        elif opc == '1': crear_factura()
-        elif opc == '2': resumen('semanal')
-        elif opc == '3': resumen('mensual')
-        else: input('Opcion incorrecta, presione ENTER y vuelva a intentar')
-        input('Presione ENTER para continuar')
+#        elif opc == '2':
+#            resumen_por_cliente(periodo, clientes)
+#            break
+
+#        else: input('Opcion incorrecta, presione ENTER y vuelva a intentar')
