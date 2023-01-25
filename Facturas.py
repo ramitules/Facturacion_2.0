@@ -33,18 +33,24 @@ class caja_cargar_factura(Frame):
                                       state='readonly',
                                       width=30)
 
-        self.enc_ID = Label(self.frame_IDs, text='ID')
+        self.enc_ID = Label(self.frame_IDs, text='ID\n')
         self.enc_descripcion = Label(self.frame_descripciones, text='Descripcion')
-        self.enc_conteo = Label(self.frame_conteos, text='Conteo')
-        self.enc_cantidad = Label(self.frame_cantidades, text='Cantidad')
-        self.enc_p_unitario = Label(self.frame_precios, text='Precio unitario')
-        self.enc_total = Label(self.frame_totales, text='Total')
+        self.enc_conteo = Label(self.frame_conteos, text='Conteo\n')
+        self.enc_cantidad = Label(self.frame_cantidades, text='Cantidad\n')
+        self.enc_p_unitario = Label(self.frame_precios, text='Precio unitario\n')
+        self.enc_total = Label(self.frame_totales, text='Total\n')
+
+        self.label_id = Label(self.frame_IDs)
+        self.label_conteo = Label(self.frame_conteos)
+        self.entry_cantidad = Entry(self.frame_cantidades)
+        self.label_precio = Label(self.frame_precios)
+        self.total = Label(self.frame_totales)
+
 
         self.selec_articulo = Combobox(self.frame_descripciones,
                                         values=[articulo.descripcion for articulo in self.articulos],
                                         state='readonly',
                                         width=20)
-        self.selec_articulo.bind('<<ComboboxSelected>>', self.cargar_items)
         
         self.cargar_widgets()
 
@@ -55,46 +61,46 @@ class caja_cargar_factura(Frame):
         self.label_cliente.pack(anchor='center')
         self.selec_cliente.pack(anchor='center')
         self.selec_cliente.bind('<<ComboboxSelected>>', self.cargar_articulos)
+        self.selec_articulo.bind('<<ComboboxSelected>>', self.cargar_items)
 
         self.frame_articulos.rowconfigure(0, weight=1)
 
         for i, widget in enumerate(self.frame_articulos.winfo_children()):
-            self.frame_articulos.columnconfigure(i, weight=1, pad=80)
+            self.frame_articulos.columnconfigure(i, pad=80)
             widget.grid(column=i, row=0)
 
-            for subwidget in widget.winfo_children():
-                subwidget.grid(column=0, row=0)
+            for x, subwidget in enumerate(widget.winfo_children()):
+                subwidget.pack(side='top', expand=True, fill='x')
 
     def cargar_articulos(self, event):
         self.label_cliente['text'] = self.selec_cliente.get()
         self.selec_cliente.destroy()
         
     def cargar_items(self, event):
-        for i, widget in enumerate(self.frame_articulos.winfo_children()):
-            if i != 1:
-                for x, subwidget in enumerate(widget.winfo_children()):
-                    if x != 0:
-                        subwidget.destroy()
-
-        self.selec_articulo = Combobox(self.frame_descripciones,
-                                        values=[articulo.descripcion for articulo in self.articulos],
-                                        state='readonly',
-                                        width=20)
-        self.selec_articulo.bind('<<ComboboxSelected>>', self.cargar_items)
-        self.selec_articulo.grid(column=0, row=1)
+        #for i, widget in enumerate(self.frame_articulos.winfo_children()):
+        #    if i != 1:
+        #        for x, subwidget in enumerate(widget.winfo_children()):
+        #            if x != 0:
+        #                subwidget.destroy()
 
         self.label_id = Label(self.frame_IDs, text=self.articulos[self.selec_articulo.current()].ID)
         self.label_conteo = Label(self.frame_conteos, text=self.articulos[self.selec_articulo.current()].conteo)
         self.entry_cantidad = Entry(self.frame_cantidades)
         self.label_precio = Label(self.frame_precios, text=self.articulos[self.selec_articulo.current()].precio_unitario)
         self.total = Label(self.frame_totales)
+        self.selec_articulo = Combobox(self.frame_descripciones,
+                                        values=[articulo.descripcion for articulo in self.articulos],
+                                        state='readonly',
+                                        width=20)
+        self.selec_articulo.bind('<<ComboboxSelected>>', self.cargar_items)
+        self.selec_articulo.pack(side='top', expand=True, fill='x')
         
-        self.label_id.grid(column=0, row=self.selec_articulo.grid_info()['row'])
-        self.label_conteo.grid(column=0, row=self.selec_articulo.grid_info()['row'])
+        self.label_id.pack(side='top', expand=True, fill='x')
+        self.label_conteo.pack(side='top', expand=True, fill='x')
         self.entry_cantidad.bind('<FocusOut>', self.calcular_total)
-        self.entry_cantidad.grid(column=0, row=self.selec_articulo.grid_info()['row'])
-        self.label_precio.grid(column=0, row=self.selec_articulo.grid_info()['row'])
-        self.total.grid(column=0, row=self.selec_articulo.grid_info()['row'])
+        self.entry_cantidad.pack(side='top', expand=True, fill='x')
+        self.label_precio.pack(side='top', expand=True, fill='x')
+        self.total.pack(side='top', expand=True, fill='x')
 
     def calcular_total(self, event):
         unidades = float(self.entry_cantidad.get())
