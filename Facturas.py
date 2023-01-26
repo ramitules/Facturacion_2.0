@@ -1,4 +1,5 @@
 import os
+from tkinter import ttk
 from tkinter.ttk import Combobox
 from variables_globales import fecha_actual
 from funciones import cargar,volver
@@ -10,103 +11,87 @@ class caja_cargar_factura(Frame):
         super().__init__(master)
         self.pack(expand=True, fill='both')
 
-        self.plantilla = load_workbook('Plantilla.xlsx')
-        self.nueva_factura = self.plantilla
-        self.hoja = self.nueva_factura.active
+        #self.plantilla = load_workbook('Plantilla.xlsx')
+        #self.nueva_factura = self.plantilla
+        #self.hoja = self.nueva_factura.active
 
-        self.articulos = cargar('articulos')
         self.clientes = cargar('clientes')
+        self.articulos = cargar('articulos')
+        self.descripciones = [articulo.descripcion for articulo in self.articulos]
 
         self.frame_cliente = Frame(self)
         self.frame_articulos = Frame(self)
-        self.frame_IDs = Frame(self.frame_articulos)
-        self.frame_descripciones = Frame(self.frame_articulos)
-        self.frame_conteos = Frame(self.frame_articulos)
-        self.frame_cantidades = Frame(self.frame_articulos)
-        self.frame_precios = Frame(self.frame_articulos)
-        self.frame_totales = Frame(self.frame_articulos)
 
+        self.filas_ID = [Label(self.frame_articulos, text='ID')]
+        self.filas_descripcion = [Label(self.frame_articulos, text='Descripcion')]
+        self.filas_conteo = [Label(self.frame_articulos, text='Conteo')]
+        self.filas_cantidad = [Label(self.frame_articulos, text='Cantidad')]
+        self.filas_p_unitario = [Label(self.frame_articulos, text='Precio unitario')]
+        self.filas_total = [Label(self.frame_articulos, text='Subtotal')]
+
+        for i, widget in enumerate(self.frame_articulos.winfo_children()):
+            self.frame_articulos.columnconfigure(i, pad=100, weight=1)
+
+        for x in range(13):
+            self.filas_ID.append(Label(self.frame_articulos, text=' '))
+            self.filas_descripcion.append(Combobox(self.frame_articulos,
+                                                   values=self.descripciones,
+                                                   state='readonly'))
+            self.filas_conteo.append(Label(self.frame_articulos, text=' '))
+            self.filas_cantidad.append(Entry(self.frame_articulos))
+            self.filas_p_unitario.append(Label(self.frame_articulos, text=' '))
+            self.filas_total.append(Label(self.frame_articulos, text=' '))
+
+            self.filas_cantidad[x+1].bind('<FocusOut>',
+                                          lambda y, z=x+1: self.calcular_total(y, z))
+            self.filas_descripcion[x+1].bind('<<ComboboxSelected>>',
+                                             lambda y, z=x+1: self.cargar_items(y, z))
 
         self.label_cliente = Label(self.frame_cliente, text='Seleccione el cliente')
         self.selec_cliente = Combobox(self.frame_cliente,
                                       values=[cliente.nombre for cliente in self.clientes],
                                       state='readonly',
                                       width=30)
-
-        self.enc_ID = Label(self.frame_IDs, text='ID')
-        self.enc_descripcion = Label(self.frame_descripciones, text='Descripcion')
-        self.enc_conteo = Label(self.frame_conteos, text='Conteo')
-        self.enc_cantidad = Label(self.frame_cantidades, text='Cantidad')
-        self.enc_p_unitario = Label(self.frame_precios, text='Precio unitario')
-        self.enc_total = Label(self.frame_totales, text='Total')
-
-        self.label_id = Label(self.frame_IDs)
-        self.label_conteo = Label(self.frame_conteos)
-        self.entry_cantidad = Entry(self.frame_cantidades)
-        self.label_precio = Label(self.frame_precios)
-        self.total = Label(self.frame_totales)
-
-
-        self.selec_articulo = Combobox(self.frame_descripciones,
-                                        values=[articulo.descripcion for articulo in self.articulos],
-                                        state='readonly',
-                                        width=20)
         
         self.cargar_widgets()
 
     def cargar_widgets(self):
-        self.frame_cliente.place(anchor='center', relx=0.5, y=30)
-        self.frame_articulos.place(anchor='center', relx=0.5, y=100)
+        self.frame_cliente.pack(expand=True, fill='x')
+        self.frame_articulos.pack(expand=True, fill='both')
 
         self.label_cliente.pack(anchor='center')
         self.selec_cliente.pack(anchor='center')
-        self.selec_cliente.bind('<<ComboboxSelected>>', self.cargar_articulos)
-        self.selec_articulo.bind('<<ComboboxSelected>>', self.cargar_items)
+        self.selec_cliente.bind('<<ComboboxSelected>>', self.fijar_cliente)
 
-        self.frame_articulos.rowconfigure(0, weight=1)
+        for n in range(14):
+            self.frame_articulos.rowconfigure(n, pad=1, weight=1)
 
-        for i, widget in enumerate(self.frame_articulos.winfo_children()):
-            self.frame_articulos.columnconfigure(i, pad=80)
-            widget.grid(column=i, row=0)
+            self.filas_ID[n].grid(column=0, row=n)
+            self.filas_descripcion[n].grid(column=1, row=n)
+            self.filas_conteo[n].grid(column=2, row=n)
+            self.filas_cantidad[n].grid(column=3, row=n)
+            self.filas_p_unitario[n].grid(column=4, row=n)
+            self.filas_total[n].grid(column=5, row=n)
 
-            for x, subwidget in enumerate(widget.winfo_children()):
-                subwidget.pack(side='top', expand=True, fill='x')
-
-    def cargar_articulos(self, event):
+    def fijar_cliente(self, event):
         self.label_cliente['text'] = self.selec_cliente.get()
         self.selec_cliente.destroy()
         
-    def cargar_items(self, event):
-        #for i, widget in enumerate(self.frame_articulos.winfo_children()):
-        #    if i != 1:
-        #        for x, subwidget in enumerate(widget.winfo_children()):
-        #            if x != 0:
-        #                subwidget.destroy()
+        self.boton_crear = ttk.Button(self,
+                                        text='Crear factura')
+        self.boton_crear.place(anchor='center', relx=0.15, y=30)
 
-        self.label_id = Label(self.frame_IDs, text=self.articulos[self.selec_articulo.current()].ID)
-        self.label_conteo = Label(self.frame_conteos, text=self.articulos[self.selec_articulo.current()].conteo)
-        self.entry_cantidad = Entry(self.frame_cantidades)
-        self.label_precio = Label(self.frame_precios, text=self.articulos[self.selec_articulo.current()].precio_unitario)
-        self.total = Label(self.frame_totales)
-        self.selec_articulo = Combobox(self.frame_descripciones,
-                                        values=[articulo.descripcion for articulo in self.articulos],
-                                        state='readonly',
-                                        width=20)
-        self.selec_articulo.bind('<<ComboboxSelected>>', self.cargar_items)
-        self.selec_articulo.pack(side='top', expand=True, fill='x')
-        
-        self.label_id.pack(side='top', expand=True, fill='x')
-        self.label_conteo.pack(side='top', expand=True, fill='x')
-        self.entry_cantidad.bind('<FocusOut>', self.calcular_total)
-        self.entry_cantidad.pack(side='top', expand=True, fill='x')
-        self.label_precio.pack(side='top', expand=True, fill='x')
-        self.total.pack(side='top', expand=True, fill='x')
+    def cargar_items(self, event, indice):
+        self.filas_ID[indice]['text'] = self.articulos[self.filas_descripcion[indice].current()].ID
+        self.filas_conteo[indice]['text'] = self.articulos[self.filas_descripcion[indice].current()].conteo
+        self.filas_p_unitario[indice]['text'] = self.articulos[self.filas_descripcion[indice].current()].precio_unitario
 
-    def calcular_total(self, event):
-        unidades = float(self.entry_cantidad.get())
-        precio = float(self.label_precio['text'])
-        total = unidades * precio
-        self.total['text'] = total
+    def calcular_total(self, event, indice):
+        cantidad = float(self.filas_cantidad[indice].get())
+        precio = float(self.filas_p_unitario[indice]['text'])
+        total = cantidad * precio
+        print(total, '$')
+        self.filas_total[indice]['text'] = '$' + str(total)
 
 #    def crear_factura(self):
 #        self.hoja['G2'] = fecha_actual
