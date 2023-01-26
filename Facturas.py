@@ -89,8 +89,9 @@ class caja_cargar_factura(Frame):
     def calcular_total(self, event, indice):
         cantidad = float(self.filas_cantidad[indice].get())
         precio = float(self.filas_p_unitario[indice]['text'])
+
         total = cantidad * precio
-        print(total, '$')
+
         self.filas_total[indice]['text'] = '$' + str(total)
 
 #    def crear_factura(self):
