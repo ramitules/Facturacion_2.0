@@ -8,7 +8,7 @@ class programa(Tk):
     def __init__(self):
         super().__init__()
 
-        self.comprobar_darkmode()
+        #self.comprobar_darkmode()
 
         self.wm_title('Facturacion textil')
         self.geometry('1280x720')
@@ -28,37 +28,37 @@ class programa(Tk):
         self.img_darkmode = PhotoImage(file='.media\\oscuro.png')
         self.img_lightmode = PhotoImage(file='.media\\claro.png')
 
-        self.boton_dark = Button(self,
-                                 **colores_principales,
-                                 border=0,
-                                 compound=TOP,
-                                 command=self.switch_darkmode)
-        self.boton_dark.place(relx=0.99, rely=0.11, anchor='se')
+        #self.boton_dark = Button(self,
+        #                         **colores_principales,
+        #                         border=0,
+        #                         compound=TOP,
+        #                         command=self.switch_darkmode)
+        #self.boton_dark.place(relx=0.99, rely=0.11, anchor='se')
 
-        if dark_mode == True:
-            self.boton_dark.config(text='Modo: oscuro', image=self.img_darkmode)
+        #if dark_mode == True:
+        #    self.boton_dark.config(text='Modo: oscuro', image=self.img_darkmode)
 
-        else:
-            self.boton_dark.config(text='Modo: claro', image=self.img_lightmode)
+        #else:
+        #    self.boton_dark.config(text='Modo: claro', image=self.img_lightmode)
 
-    def comprobar_darkmode(self):
-        if dark_mode == False:
-            colores_principales['bg'] = '#909090'
-            colores_principales['activebackground'] = '#808080'
+    #def comprobar_darkmode(self):
+    #    if dark_mode == False:
+    #        colores_principales['bg'] = '#909090'
+    #        colores_principales['activebackground'] = '#808080'
 
-        else:
-            colores_principales['bg'] = '#454545'
-            colores_principales['activebackground'] = '#353535'
+    #    else:
+    #        colores_principales['bg'] = '#454545'
+    #        colores_principales['activebackground'] = '#353535'
 
-    def switch_darkmode(self):
-        global dark_mode
+    #def switch_darkmode(self):
+    #    global dark_mode
 
-        if dark_mode == True:
-            dark_mode = False
+    #    if dark_mode == True:
+    #        dark_mode = False
 
-        else: dark_mode = True
+    #    else: dark_mode = True
 
-        self.comprobar_darkmode()
+    #    self.comprobar_darkmode()
 
 
 class caja_principal(Frame):

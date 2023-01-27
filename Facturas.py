@@ -1,5 +1,5 @@
 import os
-from tkinter import ttk
+from tkinter import messagebox, ttk
 from tkinter.ttk import Combobox
 from variables_globales import fecha_actual
 from funciones import cargar,volver
@@ -11,13 +11,18 @@ class caja_cargar_factura(Frame):
         super().__init__(master)
         self.pack(expand=True, fill='both')
 
-        #self.plantilla = load_workbook('Plantilla.xlsx')
-        #self.nueva_factura = self.plantilla
-        #self.hoja = self.nueva_factura.active
+        self.plantilla = load_workbook('Plantilla.xlsx')
+        self.nueva_factura = self.plantilla
+        self.hoja = self.nueva_factura.active
 
         self.clientes = cargar('clientes')
         self.articulos = cargar('articulos')
         self.descripciones = [articulo.descripcion for articulo in self.articulos]
+
+        if len(self.articulos) < 24:
+            self.cantidad_maxima = len(self.articulos)
+        else:
+            self.cantidad_maxima = 24
 
         self.frame_cliente = Frame(self)
         self.frame_articulos = Frame(self)
@@ -29,23 +34,23 @@ class caja_cargar_factura(Frame):
         self.filas_p_unitario = [Label(self.frame_articulos, text='Precio unitario')]
         self.filas_total = [Label(self.frame_articulos, text='Subtotal')]
 
-        for i, widget in enumerate(self.frame_articulos.winfo_children()):
+        for i in range(len(self.frame_articulos.winfo_children())):
             self.frame_articulos.columnconfigure(i, pad=100, weight=1)
 
-        for x in range(13):
+        for x in range(self.cantidad_maxima):
             self.filas_ID.append(Label(self.frame_articulos, text=' '))
             self.filas_descripcion.append(Combobox(self.frame_articulos,
-                                                   values=self.descripciones,
-                                                   state='readonly'))
+                                                    values=self.descripciones,
+                                                    state='readonly'))
             self.filas_conteo.append(Label(self.frame_articulos, text=' '))
             self.filas_cantidad.append(Entry(self.frame_articulos))
             self.filas_p_unitario.append(Label(self.frame_articulos, text=' '))
             self.filas_total.append(Label(self.frame_articulos, text=' '))
 
             self.filas_cantidad[x+1].bind('<FocusOut>',
-                                          lambda y, z=x+1: self.calcular_total(y, z))
+                                            lambda y, z=x+1: self.calcular_total(y, z))
             self.filas_descripcion[x+1].bind('<<ComboboxSelected>>',
-                                             lambda y, z=x+1: self.cargar_items(y, z))
+                                                lambda y, z=x+1: self.cargar_items(y, z))
 
         self.label_cliente = Label(self.frame_cliente, text='Seleccione el cliente')
         self.selec_cliente = Combobox(self.frame_cliente,
@@ -63,7 +68,7 @@ class caja_cargar_factura(Frame):
         self.selec_cliente.pack(anchor='center')
         self.selec_cliente.bind('<<ComboboxSelected>>', self.fijar_cliente)
 
-        for n in range(14):
+        for n in range(self.cantidad_maxima + 1):
             self.frame_articulos.rowconfigure(n, pad=1, weight=1)
 
             self.filas_ID[n].grid(column=0, row=n)
@@ -78,64 +83,58 @@ class caja_cargar_factura(Frame):
         self.selec_cliente.destroy()
         
         self.boton_crear = ttk.Button(self,
-                                        text='Crear factura')
-        self.boton_crear.place(anchor='center', relx=0.15, y=30)
+                                      text='Crear factura',
+                                      command=self.crear_factura)
+        self.boton_crear.pack(expand=True)
 
     def cargar_items(self, event, indice):
         self.filas_ID[indice]['text'] = self.articulos[self.filas_descripcion[indice].current()].ID
         self.filas_conteo[indice]['text'] = self.articulos[self.filas_descripcion[indice].current()].conteo
-        self.filas_p_unitario[indice]['text'] = self.articulos[self.filas_descripcion[indice].current()].precio_unitario
+        self.filas_p_unitario[indice]['text'] = '$' + str(self.articulos[self.filas_descripcion[indice].current()].precio_unitario)
 
     def calcular_total(self, event, indice):
+        if self.filas_cantidad[indice].get() == '' or self.filas_p_unitario[indice]['text'] == '':
+            return
+
         cantidad = float(self.filas_cantidad[indice].get())
-        precio = float(self.filas_p_unitario[indice]['text'])
+        precio = float(self.filas_p_unitario[indice]['text'].replace('$', ''))
 
         total = cantidad * precio
 
         self.filas_total[indice]['text'] = '$' + str(total)
 
-#    def crear_factura(self):
-#        self.hoja['G2'] = fecha_actual
-#        self.hoja['C2'] = self.selec_cliente.get()
-#        #os.chdir('..')
-#        #os.chdir(f'Optitex\\{clientes[opc].nombre}')
-#        acumular = float(0)
-#        print('\nPrimer articulo')
-#        for x in range(13):
-#            indice = str(x+5)
+    def crear_factura(self):
+        self.hoja['G2'] = fecha_actual
+        self.hoja['C2'] = self.label_cliente['text']
 
-#            for articulo in articulos:
-#                print(articulo)
+        #os.chdir('..')
+        #os.chdir(f'Optitex\\{clientes[opc].nombre}')
+        total = 0
+        for i in range(1, self.cantidad_maxima):
+            self.hoja[f'B{i+4}'] = self.filas_ID[i]['text']
+            self.hoja[f'C{i+4}'] = self.filas_descripcion[i].get()
+            self.hoja[f'D{i+4}'] = self.filas_conteo[i]['text']
+            self.hoja[f'E{i+4}'] = self.filas_cantidad[i].get()
+            self.hoja[f'F{i+4}'] = self.filas_p_unitario[i]['text']
+            self.hoja[f'G{i+4}'] = self.filas_total[i]['text']
 
-#            opc = int(input('Opcion: '))
-#            opc -= 1
+            if self.filas_total[i]['text'] != '':
+                subtotal = self.filas_total[i]['text'].replace('$','')
+                total += float(subtotal)
 
-#            hoja['B'+indice] = articulos[opc].ID
-#            hoja['C'+indice] = articulos[opc].descripcion
-#            hoja['D'+indice] = articulos[opc].conteo
+        self.hoja['G29'] = total
+        #archivoMRK = seleccionar_mark()
 
-#            print(articulos[opc].conteo, end = " ")
-#            cant = float(input('cantidad: '))
+        #hoja['B19'] = str("Observaciones: archivo " + archivoMRK)
+        #os.chdir('Facturas')
+        #nueva_factura.save(f'{archivoMRK}.xlsx')
+        #os.startfile(f'{archivoMRK}.xlsx')
+        self.nueva_factura.save('ejemplo.xlsx')
 
-#            hoja['E'+indice] = cant
-#            hoja['F'+indice] = articulos[opc].precio_unitario
-#            hoja['G'+indice] = cant * articulos[opc].precio_unitario
-#            acumular += (cant * articulos[opc].precio_unitario)
-
-#            print("\nAgregar mas articulos?")
-#            opc = input("1.SI  2.NO: ")
-#            if opc == '2': break
-
-#        hoja['G18'] = acumular
-#        archivoMRK = seleccionar_mark()
-
-#        hoja['B19'] = str("Observaciones: archivo " + archivoMRK)
-#        os.chdir('Facturas')
-#        nueva_factura.save(f'{archivoMRK}.xlsx')
-#        os.startfile(f'{archivoMRK}.xlsx')
-
-#        print("Factura creada con exito")
-#        volver()
+        messagebox.showinfo('Exito',
+                            'Factura creada con exito')
+        self.master.destroy()
+        #volver()
 
 #def seleccionar_mark():
 #    os.system("cls")

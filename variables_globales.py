@@ -6,8 +6,8 @@ medidas_principales = {'relx': 0.5,
                       'relheight': 0.2,
                       'anchor': 'center'}
 
-colores_principales = {'bg': '#454545',
-                       'activebackground': '#353535'}
+colores_principales = {'bg': '#F0FFFF',
+                       'activebackground': '#E9F7F7'}
 
 provincias = ["Buenos Aries",
               "Ciudad Autonoma de Buenos Aires",
