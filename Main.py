@@ -67,12 +67,15 @@ class caja_principal(Frame):
 
         self['bg'] = colores_principales['bg']
         self.boton_1 = Button(self, **colores_principales)
+        self.boton_1.config(compound=TOP, border=0)
         self.boton_1.place(relwidth=0.3, relheight=1, relx=0.1)
 
         self.boton_2 = Button(self, **colores_principales)
+        self.boton_2.config(compound=TOP, border=0)
         self.boton_2.place(relwidth=0.3, relheight=1, relx=0.4)
 
         self.boton_3 = Button(self, **colores_principales)
+        self.boton_3.config(compound=TOP, border=0)
         self.boton_3.place(relwidth=0.3, relheight=1, relx=0.7)
 
         self.cargar_widgets()
@@ -96,38 +99,24 @@ class caja_principal(Frame):
         self.img_ventas = PhotoImage(file='.media\\venta.png')
         self.boton_1.config(image=self.img_ventas,
                             text='Ventas',
-                            compound=TOP,
-                            border=0,
                             command=lambda: self.cambiar(self.boton_1['text']))
         
         self.img_clientes = PhotoImage(file='.media\\cliente.png')
         self.boton_2.config(image=self.img_clientes,
                             text='Clientes',
-                            compound=TOP,
-                            border=0,
                             command=lambda: self.cambiar(self.boton_2['text']))
         
         self.img_articulos = PhotoImage(file='.media\\articulo.png')
         self.boton_3.config(image=self.img_articulos,
                             text='Articulos',
-                            compound=TOP,
-                            border=0,
                             command=lambda: self.cambiar(self.boton_3['text']))
         
 
 class caja_multiuso(caja_principal):
     def __init__(self, master=None, clase: str = ...):
+        self.clase = clase
         super().__init__(master)
 
-        self.clase = clase
-
-        self.boton_atras = Button(self)
-        self.boton_atras.config(**colores_principales,
-                                text='Atras',
-                                border=0,
-                                command=self.cambiar)
-        self.boton_atras.place(relx=0)
-        
     def cambiar(self):
         self.destroy()
 
@@ -138,8 +127,6 @@ class caja_multiuso(caja_principal):
         nueva = Toplevel(self)
 
         if boton == 'Cargar':
-            
-
             if self.clase == 'Ventas':
                 nueva.geometry('960x480')
                 nueva.wm_title('Nueva factura')
@@ -179,24 +166,34 @@ class caja_multiuso(caja_principal):
 
     def cargar_widgets(self):
         self.img_cargar = PhotoImage(file='.media\\cargar.png')
+        self.img_editar = PhotoImage(file='.media\\editar.png')
+        self.img_listar = PhotoImage(file='.media\\listar.png')
+
+        self.boton_1['text'] = 'Cargar'
+        self.boton_2['text'] = 'Editar'
+        self.boton_3['text'] = 'Listar'
+
+        if self.clase == 'Ventas':
+            self.img_cargar = PhotoImage(file='.media\\comprobante.png')
+            self.img_editar = self.img_listar
+
+            self.boton_2['text'] = 'Resumen semanal'
+            self.boton_3['text'] = 'Resumen mensual'
+
+        self.boton_atras = Button(self)
+        self.boton_atras.config(**colores_principales,
+                                text='Atras',
+                                border=0,
+                                command=self.cambiar)
+        self.boton_atras.place(relx=0)
+        
         self.boton_1.config(image=self.img_cargar,
-                            text='Cargar',
-                            compound=TOP,
-                            border=0,
                             command=lambda: self.nueva_ventana(self.boton_1['text']))
 
-        self.img_editar = PhotoImage(file='.media\\editar.png')
         self.boton_2.config(image=self.img_editar,
-                            text='Editar',
-                            compound=TOP,
-                            border=0,
                             command=lambda: self.nueva_ventana(self.boton_2['text']))
 
-        self.img_listar = PhotoImage(file='.media\\listar.png')
         self.boton_3.config(image=self.img_listar,
-                            text='Listar',
-                            compound=TOP,
-                            border=0,
                             command=lambda: self.nueva_ventana(self.boton_3['text']))
 
 principal = programa()
