@@ -1,8 +1,9 @@
-from variables_globales import *
+from variables_globales import colores_principales
 from tkinter import TOP, Button, Frame, PhotoImage, Tk, Toplevel
 from Clientes import caja_cargar_cliente, caja_modificar_cliente, caja_listar_clientes
 from Articulos import caja_cargar_articulo, caja_modificar_articulo, caja_listar_articulos
 from Facturas import caja_cargar_factura
+from CRUD_articulos import crud_articulos
 
 class programa(Tk):
     def __init__(self):
@@ -13,11 +14,13 @@ class programa(Tk):
         self.wm_title('Facturacion textil')
         self.geometry('1280x720')
         self.iconbitmap(default='.media\\favicon.ico')
-        self['bg'] = colores_principales['bg']
+        self['bg'] = '#1E1E1E'
 
-        self.img_salir = PhotoImage(file='.media\\salir.png')
+        self.img_salir = PhotoImage(file='.media\\salir_b.png')
         self.salir = Button(self,
-                            **colores_principales,
+                            background='#1E1E1E',
+                            activebackground='#3E3E3E',
+                            foreground='#FFFFFF',
                             border=0,
                             text='Salir',
                             compound=TOP,
@@ -198,7 +201,7 @@ class caja_multiuso(caja_principal):
 
 principal = programa()
 
-caja = caja_principal(principal)
-caja.place(**medidas_principales)
+caja = crud_articulos(principal)
+#caja.place(**medidas_principales)
 
 principal.mainloop()
