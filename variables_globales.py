@@ -1,11 +1,5 @@
 from datetime import date
 
-medidas_principales = {'relx': 0.5, 
-                      'rely': 0.5,
-                      'relwidth':0.4,
-                      'relheight': 0.2,
-                      'anchor': 'center'}
-
 colores_principales = {'bg': '#F0FFFF',
                        'activebackground': '#E9F7F7'}
 
