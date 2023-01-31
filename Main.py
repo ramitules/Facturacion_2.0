@@ -1,6 +1,5 @@
-from tkinter import TOP, Button, Frame, PhotoImage, ttk
+from tkinter import TOP, PhotoImage, ttk
 from ttkthemes import ThemedTk, ThemedStyle
-from Facturas import caja_cargar_factura
 from CRUD_articulos import crud_articulos
 from CRUD_clientes import crud_clientes
 

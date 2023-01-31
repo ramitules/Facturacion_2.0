@@ -26,7 +26,7 @@ class interfaz_crud(ttk.Frame):
 
         self.b_modificar = ttk.Button(self.fr_botones,
                                       text='Modificar',
-                                      command=self.f_crear)
+                                      command=self.f_modificar)
         self.b_modificar.place(relx=0.5, rely=0.4, anchor='center', relwidth=0.9)
 
         self.b_eliminar = ttk.Button(self.fr_botones,
@@ -34,7 +34,16 @@ class interfaz_crud(ttk.Frame):
                                      command=self.f_eliminar)
         self.b_eliminar.place(relx=0.5, rely=0.6, anchor='center', relwidth=0.9)
 
-        self.cargar_widgets()
+    def f_crear(self):
+        self.boton_aceptar = ttk.Button(self.fr_atributos,
+                                        text='Aceptar',
+                                        command=self.f_aceptar_crear)
+        self.boton_aceptar.place(relx=0.05, rely=0.93, relwidth=0.4)
+
+        self.boton_cancelar = ttk.Button(self.fr_atributos,
+                                         text='Cancelar',
+                                         command=self.f_cancelar)
+        self.boton_cancelar.place(relx=0.5, rely=0.93, relwidth=0.4)
 
     def f_atras(self):
         self.destroy()
@@ -45,6 +54,3 @@ class interfaz_crud(ttk.Frame):
     def f_cancelar(self):
         for widget in self.fr_atributos.winfo_children():
             widget.destroy()
-
-    def f_salir(self):
-        self.master.destroy()
