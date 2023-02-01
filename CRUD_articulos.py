@@ -59,9 +59,37 @@ class crud_articulos(interfaz_crud):
 		self.ent_precio.place(x=10, y=190)
 
 		self.ent_descripcion.focus()
+		
+	def f_aceptar_crear(self):
+		nuevo_articulo = art(id=int(1),
+							 descripcion=self.ent_descripcion.get(),
+							 conteo=self.ent_conteo.get(),
+							 precio_unitario=self.ent_precio.get())
+
+		for articulo in self.articulos:
+			if articulo[1] == self.ent_descripcion.get():
+				return messagebox.showwarning('Error',
+											  f'El articulo "{articulo[1]}" ya existe.')
+			
+			elif self.ent_descripcion.get() == '':
+				return messagebox.showwarning('Error',
+											  'La descripcion es obligatoria')
+
+		if len(self.articulos) != 0:
+			for elemento in self.articulos:
+				nuevo_articulo.ID = elemento[0] + 1
+
+		with open('articulos.pkl', 'ab') as f:
+			pickle.dump(nuevo_articulo, f)
+
+		self.f_cancelar()
+
+		return messagebox.showinfo('Exito',
+								   'El articulo se ha creado con exito')
 
 	def f_modificar(self):
 		self.f_cancelar()
+
 		try:
 			item = self.tabla.selection()[0]
 			valores = self.tabla.item(item, option='values')
@@ -75,54 +103,6 @@ class crud_articulos(interfaz_crud):
 		self.ent_precio.insert(0, valores[3])
 
 		self.boton_aceptar.configure(command=lambda: self.f_aceptar_modificar(valores))
-		
-	def f_eliminar(self):
-		self.f_cancelar()
-
-	def decimales(self, texto):
-		return texto.isdecimal()
-
-	def f_aceptar_crear(self):
-		articulo = art(id=int(1),
-					   descripcion=self.ent_descripcion.get(),
-					   conteo=self.ent_conteo.get(),
-					   precio_unitario=self.ent_precio.get())
-		try:
-			item = self.tabla.selection()[0]
-			articulo.ID = self.tabla.item(item, option='values')[0]
-		except IndexError:
-			pass
-
-		for articulo in self.articulos:
-			if articulo[1] == self.ent_descripcion.get():
-				return messagebox.showwarning('Error',
-											  f'El articulo "{articulo[1]}" ya existe.')
-			
-			elif self.ent_descripcion.get() == '':
-				return messagebox.showwarning('Error',
-											  'La descripcion es obligatoria')
-
-		try:
-			f = open('articulos.pkl', 'rb')
-			while True:
-				try:
-					x = pickle.load(f)
-				except EOFError:
-					f.close()
-					i = x.ID + 1
-					articulo.ID = i
-					break
-		except FileNotFoundError: pass
-
-		with open('articulos.pkl', 'ab') as f:
-			pickle.dump(articulo, f)
-
-		self.f_cancelar()
-
-		return messagebox.showinfo('Articulo',
-								   'El articulo se ha creado con exito')
-
-		
 
 	def f_aceptar_modificar(self, valores):
 		if self.ent_descripcion.get() == '':
@@ -141,3 +121,30 @@ class crud_articulos(interfaz_crud):
 
 		return messagebox.showinfo('Exito',
 								   'El articulo se ha modificado con exito')
+
+	def f_eliminar(self):
+		self.f_cancelar()
+
+		try:
+			item = self.tabla.selection()[0]
+			valores = self.tabla.item(item, option='values')
+		except IndexError:
+			return messagebox.showwarning('Error', 'Debe seleccionar un elemento')
+
+		if messagebox.askyesno('Eliminar',
+							'Seguro que desea eliminar el articulo seleccionado?'):
+			for i, articulo in enumerate(self.binarios):
+				if articulo.ID == int(valores[0]):
+					self.binarios.pop(i)
+
+			self.tabla.delete(item)
+
+			with open('articulos.pkl', 'wb') as f:
+				for articulo in self.binarios:
+					pickle.dump(articulo, f)
+
+			return messagebox.showinfo('Exito',
+									   'El articulo se ha eliminado con exito')
+
+		else: return messagebox.showinfo('Error',
+										 'Ha ocurrido un error')

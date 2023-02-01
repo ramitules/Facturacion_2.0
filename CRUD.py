@@ -54,3 +54,6 @@ class interfaz_crud(ttk.Frame):
     def f_cancelar(self):
         for widget in self.fr_atributos.winfo_children():
             widget.destroy()
+
+    def decimales(self, texto):
+	    return texto.isdecimal()
