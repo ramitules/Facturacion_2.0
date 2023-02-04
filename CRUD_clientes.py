@@ -183,8 +183,7 @@ class crud_clientes(interfaz_crud):
             return messagebox.showinfo('Exito',
                                        'El cliente se ha eliminado con exito')
 
-        else: return messagebox.showinfo('Error',
-                                         'Ha ocurrido un error')
+        else: return
 
     def crear_directorios(self):
         os.chdir('..')

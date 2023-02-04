@@ -2,9 +2,9 @@ import os
 from tkinter import messagebox, ttk
 from tkinter.ttk import Combobox
 from variables_globales import fecha_actual
-from funciones import cargar,volver
+from funciones import cargar
 from openpyxl import *
-from tkinter import Entry, Frame, Label, filedialog
+from tkinter import Entry, Frame, Label
 
 class caja_cargar_factura(Frame):
     def __init__(self, master=None):
