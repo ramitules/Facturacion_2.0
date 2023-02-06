@@ -143,15 +143,56 @@ class ventas(interfaz_crud):
         self.crear_combobox(self.tree_factura.get_children()[self.contador])
     
     def crear_factura(self):
-        pass
-        #with excel.load_workbook('Plantila.xlsx') as plantilla:
-        #    nueva_factura = plantilla
-        #    hoja = nueva_factura.active
 
-        #hoja['D1'] = self.facturas[-1][0]
-        #hoja['B2'] = self.com_cliente.get()
-        #hoja['B3'] = fecha_actual
-        #hoja['B4'] = self.clientes_bin[self.clientes.index(self.com_cliente.get())].cond_fiscal
+        plantilla = excel.load_workbook('Plantilla.xlsx')
+        nueva_factura = plantilla
+        hoja = nueva_factura.active
 
-        #self.fr_articulos.destroy()
-        #return messagebox.showinfo('Exito', 'La factura se ha creado con exito')
+        hoja['D1'] = self.facturas[-1][0] + 1
+        hoja['B2'] = self.com_cliente.get()
+        hoja['B3'] = fecha_actual
+        hoja['B4'] = self.clientes_bin[self.clientes.index(self.com_cliente.get())].cond_fiscal
+
+        if messagebox.askyesno('Observaciones', 'Desea agregar alguna observacion?'):
+            self.ventana = Toplevel(self)
+            observacion = ttk.Entry(self.ventana)
+            observacion.pack(side='left')
+            aceptar = ttk.Button(self.ventana, text='Aceptar', command=lambda o=observacion.get(): self.cargar_factura(hoja, o))
+            aceptar.pack(side='left')
+            cancelar = ttk.Button(self.ventana, text='Cancelar', command=self.ventana.destroy)
+            cancelar.pack(side='left')
+
+        else:
+            self.cargar_factura(hoja)
+            
+        nueva_factura.save('ej1.xlsx')
+
+        if messagebox.askyesno('Exito', 'La factura se ha creado con exito, desea abrirla?'):
+            os.startfile('ej1.xlsx')
+
+        self.destroy()
+
+    def cargar_factura(self, hoja, o=''):
+        hoja['B26'] = o
+        
+        try:
+            self.ventana.destroy()
+        except:
+            pass
+
+        total = float(0)
+
+        for i, item in enumerate(self.tree_factura.get_children(), 8):
+            if self.tree_factura.set(item, 'cantidad') == '-':
+                break
+
+            hoja[f'A{i}'] = float(self.tree_factura.set(item, 'cantidad'))
+            hoja[f'B{i}'] = self.tree_factura.set(item, 'descripcion')
+            hoja[f'C{i}'] = float(self.tree_factura.set(item, 'conteo'))
+            hoja[f'D{i}'] = float(self.tree_factura.set(item, 'precio'))
+            hoja[f'E{i}'] = float(self.tree_factura.set(item, 'total'))
+
+            total += float(self.tree_factura.set(item, 'total'))
+
+        
+        hoja['E32'] = total

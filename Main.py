@@ -4,7 +4,6 @@ from CRUD_articulos import crud_articulos
 from CRUD_clientes import crud_clientes
 from CRUD_ventas import ventas
 
-
 class programa(ThemedTk):
     def __init__(self):
         super().__init__()
@@ -103,6 +102,10 @@ class programa(ThemedTk):
 
     #    self.comprobar_darkmode()
 
-principal = programa()
+#principal = programa()
 
-principal.mainloop()
+#principal.mainloop()
+
+y = int(12333)
+
+print(round(y/100)*100)
