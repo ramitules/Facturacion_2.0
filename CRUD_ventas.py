@@ -193,6 +193,6 @@ class ventas(interfaz_crud):
             hoja[f'E{i}'] = float(self.tree_factura.set(item, 'total'))
 
             total += float(self.tree_factura.set(item, 'total'))
-
+        
         
         hoja['E32'] = total

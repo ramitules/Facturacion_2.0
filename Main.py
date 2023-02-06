@@ -102,10 +102,6 @@ class programa(ThemedTk):
 
     #    self.comprobar_darkmode()
 
-#principal = programa()
+principal = programa()
 
-#principal.mainloop()
-
-y = int(12333)
-
-print(round(y/100)*100)
+principal.mainloop()
