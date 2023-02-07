@@ -164,8 +164,7 @@ class ventas(interfaz_crud):
     def crear_factura(self):
         self.valores = {'num_factura': int(self.facturas[-1][0]) + 1,
                         'cliente': self.com_cliente.get(),
-                        'fecha': fecha_actual,
-                        'cond_fiscal': self.clientes_bin[self.clientes.index(self.com_cliente.get())].cond_fiscal}
+                        'fecha': fecha_actual}
 
         plantilla = excel.load_workbook('Plantilla.xlsx')
         self.nueva_factura = plantilla
@@ -209,7 +208,6 @@ class ventas(interfaz_crud):
         self.hoja['E1'] = self.valores['num_factura']
         self.hoja['B2'] = self.valores['cliente']
         self.hoja['B3'] = self.valores['fecha']
-        self.hoja['B4'] = self.valores['cond_fiscal']
         self.hoja['E31'] = total
         self.hoja['B26'] = o
 
