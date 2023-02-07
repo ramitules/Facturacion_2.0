@@ -1,8 +1,5 @@
 from datetime import date
 
-colores_principales = {'bg': '#F0FFFF',
-                       'activebackground': '#E9F7F7'}
-
 provincias = ["Buenos Aries",
               "Ciudad Autonoma de Buenos Aires",
               "Catamarca",

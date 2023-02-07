@@ -108,7 +108,7 @@ class crud_clientes(interfaz_crud):
             for elemento in self.clientes:
                 nuevo_cliente.ID = elemento[0] + 1
 
-        #self.crear_directorios()
+        #self.crear_directorios() #Con esta funcion se crearia un directorio nuevo para el cliente
 
         with open('clientes.pkl', 'ab') as f:
             pickle.dump(nuevo_cliente, f)
@@ -184,18 +184,3 @@ class crud_clientes(interfaz_crud):
                                        'El cliente se ha eliminado con exito')
 
         else: return
-
-    def crear_directorios(self):
-        os.chdir('..')
-        os.chdir('Optitex')
-
-        try: 
-            os.mkdir(f'{self.nombre.get()}')
-            os.mkdir(f'{self.nombre.get()}\\Facturas')
-            os.mkdir(f'{self.nombre.get()}\\Vista previa')
-            os.mkdir(f'{self.nombre.get()}\\Molderias')
-            os.mkdir(f'{self.nombre.get()}\\Tizadas')
-        except FileExistsError: pass
-
-        os.chdir('..')
-        os.chdir('Facturacion')
