@@ -66,23 +66,23 @@ class crud_clientes(interfaz_crud):
         self.com_provincia = ttk.Combobox(self.fr_atributos, values=provincias)
         self.com_cond_fiscal = ttk.Combobox(self.fr_atributos, values=condicion_fiscal)
 
-        self.l_nombre.place(x=10, y=30)
-        self.ent_nombre.place(x=10, y=50)
+        self.l_nombre.place(x=10, y=20)
+        self.ent_nombre.place(x=10, y=40)
 
-        self.l_telefono.place(x=10, y=90)
-        self.ent_telefono.place(x=10, y=110)
+        self.l_telefono.place(x=10, y=80)
+        self.ent_telefono.place(x=10, y=100)
         
-        self.l_direccion.place(x=10, y=150)
-        self.ent_direccion.place(x=10, y=170)
+        self.l_direccion.place(x=10, y=140)
+        self.ent_direccion.place(x=10, y=160)
 
-        self.l_ciudad.place(x=10, y=210)
-        self.ent_ciudad.place(x=10, y=230)
+        self.l_ciudad.place(x=10, y=200)
+        self.ent_ciudad.place(x=10, y=220)
 
-        self.l_provincia.place(x=10, y=270)
-        self.com_provincia.place(x=10, y=290)
+        self.l_provincia.place(x=10, y=260)
+        self.com_provincia.place(x=10, y=280, height=30)
 
-        self.l_cond_fiscal.place(x=10, y=330)
-        self.com_cond_fiscal.place(x=10, y=350)
+        self.l_cond_fiscal.place(x=10, y=320)
+        self.com_cond_fiscal.place(x=10, y=340, height=30)
 
         self.ent_nombre.focus()
 
@@ -111,7 +111,7 @@ class crud_clientes(interfaz_crud):
         #self.crear_directorios()
 
         with open('clientes.pkl', 'ab') as f:
-            pickle.dump(cliente, f)
+            pickle.dump(nuevo_cliente, f)
 
         self.f_cancelar()
 
