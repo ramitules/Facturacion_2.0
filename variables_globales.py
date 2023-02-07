@@ -32,6 +32,4 @@ condicion_fiscal = ["Consumidor final",
                     "Monotributista",
                     "Responsable inscripto"]
 
-dark_mode = True
-
 fecha_actual = date.today()

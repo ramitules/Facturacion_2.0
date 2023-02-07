@@ -1,27 +1,31 @@
 from tkinter import TOP, PhotoImage, ttk
-from ttkthemes import ThemedTk, ThemedStyle
+from ttkthemes import ThemedTk
 from CRUD_articulos import crud_articulos
 from CRUD_clientes import crud_clientes
 from CRUD_ventas import ventas
 
 class programa(ThemedTk):
     def __init__(self):
-        super().__init__()
-
-        self.estilo = ThemedStyle(self).theme_use('equilux')
-
-        #self.comprobar_darkmode()
+        super().__init__(theme='equilux', themebg=True)
 
         self.wm_title('Facturacion textil')
         self.iconbitmap(default='.media\\favicon.ico')
-        self.configure(background='#464646',
-                       width=1280,
+        self.configure(width=1280,
                        height=720)
 
         self.img_salir = PhotoImage(file='.media\\salir_b.png')
         self.img_ventas = PhotoImage(file='.media\\venta_b.png')
         self.img_clientes = PhotoImage(file='.media\\cliente_b.png')
         self.img_articulos = PhotoImage(file='.media\\articulo_b.png')
+        self.img_darkmode = PhotoImage(file='.media\\oscuro_b.png')
+
+        self.boton_dark = ttk.Button(self,
+                                     text='Dark mode',
+                                     image=self.img_darkmode,
+                                     padding=0,
+                                     compound=TOP,
+                                     command=self.switch_darkmode)
+        self.boton_dark.place(relx=0.99, rely=0.11, anchor='se')
 
         self.salir = ttk.Button(self,
                                 text='Salir',
@@ -67,40 +71,12 @@ class programa(ThemedTk):
     def articulos(self):
         fr_secundario = crud_articulos(self)
 
-        #self.img_darkmode = PhotoImage(file='.media\\oscuro.png')
-        #self.img_lightmode = PhotoImage(file='.media\\claro.png')
+    def switch_darkmode(self):
+        if self.current_theme == 'equilux':
+            self.set_theme('adapta')
 
-        #self.boton_dark = Button(self,
-        #                         **colores_principales,
-        #                         border=0,
-        #                         compound=TOP,
-        #                         command=self.switch_darkmode)
-        #self.boton_dark.place(relx=0.99, rely=0.11, anchor='se')
-
-        #if dark_mode == True:
-        #    self.boton_dark.config(text='Modo: oscuro', image=self.img_darkmode)
-
-        #else:
-        #    self.boton_dark.config(text='Modo: claro', image=self.img_lightmode)
-
-    #def comprobar_darkmode(self):
-    #    if dark_mode == False:
-    #        colores_principales['bg'] = '#909090'
-    #        colores_principales['activebackground'] = '#808080'
-
-    #    else:
-    #        colores_principales['bg'] = '#454545'
-    #        colores_principales['activebackground'] = '#353535'
-
-    #def switch_darkmode(self):
-    #    global dark_mode
-
-    #    if dark_mode == True:
-    #        dark_mode = False
-
-    #    else: dark_mode = True
-
-    #    self.comprobar_darkmode()
+        else:
+            self.set_theme('equilux')
 
 principal = programa()
 

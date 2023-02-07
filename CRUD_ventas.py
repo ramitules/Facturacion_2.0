@@ -1,7 +1,6 @@
 import os
-import pickle
 import openpyxl as excel
-from tkinter import END, TOP, PhotoImage, Toplevel, messagebox, ttk
+from tkinter import END, PhotoImage, Toplevel, messagebox, ttk
 from funciones import cargar
 from CRUD import interfaz_crud
 from variables_globales import fecha_actual
@@ -20,15 +19,19 @@ class ventas(interfaz_crud):
         self.cargar_widgets()
 
     def cargar_facturas(self):
-        lista = os.listdir('Facturas')
+        lista = []
 
-        for i, item in enumerate(lista):
-            aux = excel.load_workbook(str('Facturas\\' + item))
-            hoja = aux.active
-            lista[i] = [hoja['D1'].value,
-                        hoja['B3'].value,
-                        hoja['B2'].value,
-                        hoja['E32'].value]
+        if len(self.facturas_dir) > 0:
+            for fac in self.facturas_dir:
+                aux = excel.load_workbook(str('Facturas\\' + fac))
+                hoja = aux.active
+
+                lista.append([hoja['E1'].value,
+                            hoja['B3'].value,
+                            hoja['B2'].value,
+                            hoja['E31'].value])
+        else:
+            lista.append([0, 0, 0, 0])
 
         return lista
 
@@ -77,14 +80,23 @@ class ventas(interfaz_crud):
         for articulo in self.articulos_bin:
             self.articulos.append(articulo.descripcion)
 
-        self.com_cliente = ttk.Combobox(self.fr_atributos, values=self.clientes, state='readonly')
+        self.com_cliente = ttk.Combobox(self.fr_atributos,
+                                        values=self.clientes,
+                                        state='readonly')
         self.com_cliente.place(relx=0.5, rely=0.5, anchor='center')
         self.com_cliente.bind('<<ComboboxSelected>>', activar_boton)
-   
-        
+    
     def f_aceptar_crear(self):
-        self.tree_factura = ttk.Treeview(self, columns=('cantidad', 'descripcion', 'conteo', 'precio', 'total'))
-        self.boton_crear_factura = ttk.Button(self.tree_factura, padding=0, state='disabled', text='Crear factura', command=self.crear_factura)
+        self.tree_factura = ttk.Treeview(self, columns=('cantidad',
+                                                        'descripcion',
+                                                        'conteo',
+                                                        'precio',
+                                                        'total'))
+        self.boton_crear_factura = ttk.Button(self.tree_factura,
+                                              padding=0,
+                                              state='disabled',
+                                              text='Crear factura',
+                                              command=self.crear_factura)
         self.boton_crear_factura.place(rely=0.9, x=0, height='30')
 
         self.tree_factura.column('#0', width=100)
@@ -103,24 +115,31 @@ class ventas(interfaz_crud):
         self.tree_factura.pack(fill='both', expand=True)
 
         for i in range(15):
-            self.tree_factura.insert('', i, text=f'Fila {i+1}', values=('-','-','-','-','-'))
+            self.tree_factura.insert('', i, text=f'Fila {i+1}',
+                                     values=('-','-','-','-','-'))
 
         self.contador = int(0)
 
         self.crear_combobox(self.tree_factura.get_children()[self.contador])
 
     def crear_combobox(self, item):
-        self.combobox = ttk.Combobox(self.tree_factura, state='readonly', values=self.articulos)
-        self.combobox.bind('<<ComboboxSelected>>', lambda ev, i=item: self.crear_entry(i))
+        self.combobox = ttk.Combobox(self.tree_factura,
+                                     state='readonly',
+                                     values=self.articulos)
+        self.combobox.bind('<<ComboboxSelected>>',
+                           lambda ev, i=item: self.crear_entry(i))
         self.combobox.place(rely=0.9, relx=0.35, relwidth=0.15, height='30')
 
     def crear_entry(self, item):
-        self.entry = ttk.Entry(self.tree_factura, validate='key', validatecommand=(self.register(self.decimales), '%S'), )
+        self.entry = ttk.Entry(self.tree_factura)
         self.entry.insert(0, '0')
         self.entry.place(rely=0.9, relx=0.15, relwidth=0.14, height='30')
 
         self.img_boton = PhotoImage(file='.media\\anadir_b.png')
-        self.boton = ttk.Button(self.tree_factura, image=self.img_boton, command=lambda i=item: self.setear(i), padding=0, )
+        self.boton = ttk.Button(self.tree_factura,
+                                image=self.img_boton,
+                                command=lambda i=item: self.setear(i),
+                                padding=0)
         self.boton.place(rely=0.9, relx=0.1)
 
     def setear(self, item):
@@ -143,38 +162,31 @@ class ventas(interfaz_crud):
         self.crear_combobox(self.tree_factura.get_children()[self.contador])
     
     def crear_factura(self):
+        self.valores = {'num_factura': int(self.facturas[-1][0]) + 1,
+                        'cliente': self.com_cliente.get(),
+                        'fecha': fecha_actual,
+                        'cond_fiscal': self.clientes_bin[self.clientes.index(self.com_cliente.get())].cond_fiscal}
 
         plantilla = excel.load_workbook('Plantilla.xlsx')
-        nueva_factura = plantilla
-        hoja = nueva_factura.active
+        self.nueva_factura = plantilla
+        self.hoja = self.nueva_factura.active
 
-        hoja['D1'] = self.facturas[-1][0] + 1
-        hoja['B2'] = self.com_cliente.get()
-        hoja['B3'] = fecha_actual
-        hoja['B4'] = self.clientes_bin[self.clientes.index(self.com_cliente.get())].cond_fiscal
+        self.observaciones()
 
-        if messagebox.askyesno('Observaciones', 'Desea agregar alguna observacion?'):
+    def observaciones(self):
+        if messagebox.askyesno('Observaciones',
+                               'Desea agregar alguna observacion?'):
             self.ventana = Toplevel(self)
-            observacion = ttk.Entry(self.ventana)
+            observacion = ttk.Entry(self.ventana, width=100)
             observacion.pack(side='left')
-            aceptar = ttk.Button(self.ventana, text='Aceptar', command=lambda o=observacion.get(): self.cargar_factura(hoja, o))
+            aceptar = ttk.Button(self.ventana, text='Aceptar',
+                                 command=lambda o=observacion.get(): self.cargar_factura(o))
             aceptar.pack(side='left')
-            cancelar = ttk.Button(self.ventana, text='Cancelar', command=self.ventana.destroy)
-            cancelar.pack(side='left')
 
         else:
-            self.cargar_factura(hoja)
-            
-        nueva_factura.save('ej1.xlsx')
+            self.cargar_factura()
 
-        if messagebox.askyesno('Exito', 'La factura se ha creado con exito, desea abrirla?'):
-            os.startfile('ej1.xlsx')
-
-        self.destroy()
-
-    def cargar_factura(self, hoja, o=''):
-        hoja['B26'] = o
-        
+    def cargar_factura(self, o=''):
         try:
             self.ventana.destroy()
         except:
@@ -186,13 +198,24 @@ class ventas(interfaz_crud):
             if self.tree_factura.set(item, 'cantidad') == '-':
                 break
 
-            hoja[f'A{i}'] = float(self.tree_factura.set(item, 'cantidad'))
-            hoja[f'B{i}'] = self.tree_factura.set(item, 'descripcion')
-            hoja[f'C{i}'] = float(self.tree_factura.set(item, 'conteo'))
-            hoja[f'D{i}'] = float(self.tree_factura.set(item, 'precio'))
-            hoja[f'E{i}'] = float(self.tree_factura.set(item, 'total'))
+            self.hoja[f'A{i}'] = float(self.tree_factura.set(item, 'cantidad'))
+            self.hoja[f'B{i}'] = self.tree_factura.set(item, 'descripcion')
+            self.hoja[f'C{i}'] = self.tree_factura.set(item, 'conteo')
+            self.hoja[f'D{i}'] = float(self.tree_factura.set(item, 'precio'))
+            self.hoja[f'E{i}'] = float(self.tree_factura.set(item, 'total'))
 
             total += float(self.tree_factura.set(item, 'total'))
         
-        
-        hoja['E32'] = total
+        self.hoja['E1'] = self.valores['num_factura']
+        self.hoja['B2'] = self.valores['cliente']
+        self.hoja['B3'] = self.valores['fecha']
+        self.hoja['B4'] = self.valores['cond_fiscal']
+        self.hoja['E31'] = total
+        self.hoja['B26'] = o
+
+        self.nueva_factura.save(f'Facturas\\factura_{self.valores["num_factura"]}_{self.valores["cliente"]}.xlsx')
+
+        if messagebox.askyesno('Exito', 'La factura se ha creado con exito, desea abrirla?'):
+            os.startfile(f'Facturas\\factura_{self.valores["num_factura"]}_{self.valores["cliente"]}.xlsx')
+
+        self.destroy()
