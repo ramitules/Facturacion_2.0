@@ -8,7 +8,7 @@ class programa(ThemedTk):
     def __init__(self):
         super().__init__(theme='equilux', themebg=True)
 
-        self.wm_title('Facturacion textil')
+        self.wm_title('Facturacion')
         self.iconbitmap(default='.media\\favicon.ico')
         self.configure(width=1280,
                        height=720)
