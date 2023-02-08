@@ -13,7 +13,6 @@ class ventas(interfaz_crud):
         self.b_modificar.destroy()
         self.b_eliminar.destroy()
 
-        self.facturas_dir = os.listdir('Facturas')
         self.facturas = self.cargar_facturas()
 
         self.cargar_widgets()
@@ -21,8 +20,10 @@ class ventas(interfaz_crud):
     def cargar_facturas(self):
         lista = []
 
-        if len(self.facturas_dir) > 0:
-            for fac in self.facturas_dir:
+        facturas_dir = os.listdir('Facturas')
+
+        if len(facturas_dir) > 0:
+            for fac in facturas_dir:
                 aux = excel.load_workbook(str('Facturas\\' + fac))
                 hoja = aux.active
 
@@ -179,14 +180,15 @@ class ventas(interfaz_crud):
             self.ventana = Toplevel(self)
             observacion = ttk.Entry(self.ventana, width=100)
             observacion.pack(side='left')
+
             aceptar = ttk.Button(self.ventana, text='Aceptar',
-                                 command=lambda o=observacion.get(): self.cargar_factura(o))
+                                 command=lambda: self.cargar_factura(observacion.get()))
             aceptar.pack(side='left')
 
         else:
             self.cargar_factura()
 
-    def cargar_factura(self, o=''):
+    def cargar_factura(self, o):
         try:
             self.ventana.destroy()
         except:
@@ -206,7 +208,7 @@ class ventas(interfaz_crud):
 
             total += float(self.tree_factura.set(item, 'total'))
         
-        self.hoja['E1'] = self.valores['num_factura']
+        self.hoja['E1'] = int(self.valores['num_factura']) + 1
         self.hoja['B2'] = self.valores['cliente']
         self.hoja['B3'] = self.valores['fecha']
         self.hoja['B4'] = self.valores['cond_fiscal']

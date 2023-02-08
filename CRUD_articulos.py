@@ -87,22 +87,29 @@ class crud_articulos(interfaz_crud):
                              descripcion=self.ent_descripcion.get(),
                              conteo=self.ent_conteo.get(),
                              precio_unitario=self.ent_precio.get())
-
-        for articulo in self.articulos:
-            if articulo[1] == self.ent_descripcion.get():
-                return messagebox.showwarning('Error',
-                                              f'El articulo "{articulo[1]}" ya existe.')
             
-            elif self.ent_descripcion.get() == '':
-                return messagebox.showwarning('Error',
-                                              'La descripcion es obligatoria')
+        if self.ent_descripcion.get() == '':
+            return messagebox.showwarning('Error',
+                                            'La descripcion es obligatoria')
 
         if len(self.articulos) != 0:
             for elemento in self.articulos:
+                if elemento[1] == self.ent_descripcion.get():
+                    return messagebox.showwarning('Error',
+                                                  f'El articulo "{elemento[1]}" ya existe.')
+            
                 nuevo_articulo.ID = elemento[0] + 1
 
         with open('articulos.pkl', 'ab') as f:
             pickle.dump(nuevo_articulo, f)
+
+        self.binarios.append(nuevo_articulo)
+        self.articulos.append([nuevo_articulo.ID,
+                               nuevo_articulo.descripcion,
+                               nuevo_articulo.conteo,
+                               nuevo_articulo.precio_unitario])
+
+        self.tabla.insert('', END, values=self.articulos[-1])
 
         self.f_cancelar()
 
@@ -160,6 +167,7 @@ class crud_articulos(interfaz_crud):
             for i, articulo in enumerate(self.binarios):
                 if articulo.ID == int(valores[0]):
                     self.binarios.pop(i)
+                    self.articulos.pop(i)
 
             self.tabla.delete(item)
 

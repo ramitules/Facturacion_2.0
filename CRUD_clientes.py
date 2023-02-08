@@ -1,4 +1,3 @@
-import os
 import pickle
 from tkinter import END, messagebox, ttk
 from variables_globales import provincias, condicion_fiscal
@@ -95,23 +94,25 @@ class crud_clientes(interfaz_crud):
                             provincia=self.com_provincia.get(),
                             cond_fiscal=self.com_cond_fiscal.get())
 
-        for cliente in self.clientes:
-            if cliente[1] == self.ent_nombre.get():
-                return messagebox.showwarning('Error',
-                                              f'El cliente "{cliente[1]}" ya existe.')
-
-            elif self.ent_nombre.get() == '':
-                return messagebox.showwarning('Error',
-                                              f'El nombre es obligatorio')
+        if self.ent_nombre.get() == '':
+            return messagebox.showwarning('Error',
+                                          f'El nombre es obligatorio')
 
         if len(self.clientes) != 0:
             for elemento in self.clientes:
+                if elemento[1] == self.ent_nombre.get():
+                    return messagebox.showwarning('Error',
+                                                  f'El cliente "{elemento[1]}" ya existe.')
+
                 nuevo_cliente.ID = elemento[0] + 1
 
         #self.crear_directorios() #Con esta funcion se crearia un directorio nuevo para el cliente
 
         with open('clientes.pkl', 'ab') as f:
             pickle.dump(nuevo_cliente, f)
+
+        self.binarios.append(nuevo_cliente)
+        self.clientes.append([nuevo_cliente.ID, nuevo_cliente.nombre])
 
         self.f_cancelar()
 
@@ -139,6 +140,11 @@ class crud_clientes(interfaz_crud):
         self.boton_aceptar.configure(command=lambda: self.f_aceptar_modificar(valores))
 
     def f_aceptar_modificar(self, valores):
+        for cliente in self.clientes:
+            if cliente[1] == self.ent_nombre.get():
+                return messagebox.showwarning('Error',
+                                              f'El cliente "{cliente[1]}" ya existe.')
+        
         if self.ent_nombre.get() == '':
             return messagebox.showwarning('Error',
                                           'El nombre es obligatorio')
@@ -173,6 +179,7 @@ class crud_clientes(interfaz_crud):
             for i, cliente in enumerate(self.binarios):
                 if cliente.ID == int(valores[0]):
                     self.binarios.pop(i)
+                    self.clientes.pop(i)
 
             self.tabla.delete(item)
 
