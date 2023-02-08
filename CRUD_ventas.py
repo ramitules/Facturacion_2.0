@@ -1,7 +1,7 @@
 import os
 import openpyxl as excel
 from tkinter import END, PhotoImage, Toplevel, messagebox, ttk
-from funciones import cargar
+from funciones import cargar, volver
 from CRUD import interfaz_crud
 from variables_globales import fecha_actual
 
@@ -13,7 +13,6 @@ class ventas(interfaz_crud):
         self.b_modificar.destroy()
         self.b_eliminar.destroy()
 
-        self.facturas_dir = os.listdir('Facturas')
         self.facturas = self.cargar_facturas()
 
         self.cargar_widgets()
@@ -21,17 +20,30 @@ class ventas(interfaz_crud):
     def cargar_facturas(self):
         lista = []
 
-        if len(self.facturas_dir) > 0:
-            for fac in self.facturas_dir:
-                aux = excel.load_workbook(str('Facturas\\' + fac))
+        os.chdir('..')
+
+        try:
+            os.chdir('Optitex\\Facturas')
+
+        except FileNotFoundError:
+            os.mkdir('Optitex\\Facturas')
+            os.chdir('Optitex\\Facturas')
+
+        facturas_dir = os.listdir()        
+
+        if len(facturas_dir) > 0:
+            for fac in facturas_dir:
+                aux = excel.load_workbook(fac)
                 hoja = aux.active
 
                 lista.append([hoja['E1'].value,
-                            hoja['B3'].value,
-                            hoja['B2'].value,
-                            hoja['E31'].value])
+                              hoja['B5'].value,
+                              hoja['B4'].value,
+                              hoja['E31'].value])
         else:
             lista.append([0, 0, 0, 0])
+
+        volver()
 
         return lista
 
@@ -114,7 +126,7 @@ class ventas(interfaz_crud):
 
         self.tree_factura.pack(fill='both', expand=True)
 
-        for i in range(15):
+        for i in range(4):
             self.tree_factura.insert('', i, text=f'Fila {i+1}',
                                      values=('-','-','-','-','-'))
 
@@ -162,10 +174,9 @@ class ventas(interfaz_crud):
         self.crear_combobox(self.tree_factura.get_children()[self.contador])
     
     def crear_factura(self):
-        self.valores = {'num_factura': int(self.facturas[-1][0]) + 1,
+        self.valores = {'num_factura': int(self.facturas[-1][0]),
                         'cliente': self.com_cliente.get(),
-                        'fecha': fecha_actual,
-                        'cond_fiscal': self.clientes_bin[self.clientes.index(self.com_cliente.get())].cond_fiscal}
+                        'fecha': fecha_actual}
 
         plantilla = excel.load_workbook('Plantilla.xlsx')
         self.nueva_factura = plantilla
@@ -174,19 +185,21 @@ class ventas(interfaz_crud):
         self.observaciones()
 
     def observaciones(self):
-        if messagebox.askyesno('Observaciones',
+        if messagebox.askyesno('Observaciones', 
                                'Desea agregar alguna observacion?'):
             self.ventana = Toplevel(self)
             observacion = ttk.Entry(self.ventana, width=100)
             observacion.pack(side='left')
+            observacion.focus_set()
+
             aceptar = ttk.Button(self.ventana, text='Aceptar',
-                                 command=lambda o=observacion.get(): self.cargar_factura(o))
+                                 command=lambda: self.cargar_factura(observacion.get()))
             aceptar.pack(side='left')
 
         else:
-            self.cargar_factura()
+            self.cargar_factura(o='')
 
-    def cargar_factura(self, o=''):
+    def cargar_factura(self, o):
         try:
             self.ventana.destroy()
         except:
@@ -206,16 +219,19 @@ class ventas(interfaz_crud):
 
             total += float(self.tree_factura.set(item, 'total'))
         
-        self.hoja['E1'] = self.valores['num_factura']
-        self.hoja['B2'] = self.valores['cliente']
-        self.hoja['B3'] = self.valores['fecha']
-        self.hoja['B4'] = self.valores['cond_fiscal']
+        self.hoja['E1'] = int(self.valores['num_factura']) + 1
+        self.hoja['B4'] = self.valores['cliente']
+        self.hoja['B5'] = self.valores['fecha']
         self.hoja['E31'] = total
         self.hoja['B26'] = o
 
-        self.nueva_factura.save(f'Facturas\\factura_{self.valores["num_factura"]}_{self.valores["cliente"]}.xlsx')
+        os.chdir('..')
+        os.chdir('Optitex\\Facturas')
+        self.nueva_factura.save(f'factura_{self.valores["num_factura"]}_{self.valores["cliente"]}.xlsx')
 
         if messagebox.askyesno('Exito', 'La factura se ha creado con exito, desea abrirla?'):
-            os.startfile(f'Facturas\\factura_{self.valores["num_factura"]}_{self.valores["cliente"]}.xlsx')
+            os.startfile(f'factura_{self.valores["num_factura"]}_{self.valores["cliente"]}.xlsx')
+
+        volver()
 
         self.destroy()
