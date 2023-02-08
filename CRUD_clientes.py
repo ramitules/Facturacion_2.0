@@ -1,9 +1,8 @@
 import os
 import pickle
 from tkinter import END, messagebox, ttk
-from variables_globales import provincias, condicion_fiscal
 from CRUD import interfaz_crud
-from funciones import cargar
+from funciones import cargar, volver
 from Clientes import cli
 
 class crud_clientes(interfaz_crud):
@@ -23,8 +22,8 @@ class crud_clientes(interfaz_crud):
                                   columns=('id', 'nombre'),
                                   show='headings')
 
-        self.tabla.column('id', anchor='center')
-        self.tabla.column('nombre', anchor='center')
+        self.tabla.column('id', anchor='center', width=40)
+        self.tabla.column('nombre', anchor='center', width=500)
 
         self.tabla.heading('id', text='ID')
         self.tabla.heading('nombre', text='Nombre')
@@ -63,7 +62,7 @@ class crud_clientes(interfaz_crud):
             for elemento in self.clientes:
                 nuevo_cliente.ID = elemento[0] + 1
 
-        #self.crear_directorios() #Con esta funcion se crearia un directorio nuevo para el cliente
+        self.crear_directorios(self.ent_nombre.get())
 
         with open('clientes.pkl', 'ab') as f:
             pickle.dump(nuevo_cliente, f)
@@ -134,3 +133,21 @@ class crud_clientes(interfaz_crud):
                                        'El cliente se ha eliminado con exito')
 
         else: return
+
+    def crear_directorios(self, nombre):
+        os.chdir('..')
+        os.chdir('Optitex')
+
+        try: 
+            os.mkdir(f'{nombre}')
+            os.mkdir(f'{nombre}\\Vista previa')
+            os.mkdir(f'{nombre}\\Molderias')
+            os.mkdir(f'{nombre}\\Tizadas')
+            messagebox.showinfo('Nuevos directorios',
+                                f'Se han creado las carpetas "Vista previa", "Molderias" y "Tizadas" para el nuevo cliente {nombre}')
+
+        except FileExistsError: 
+            messagebox.showinfo('Existente',
+                                f'El cliente {nombre} ya tenia carpetas existentes. No se han creado nuevas carpetas')
+
+        volver()
